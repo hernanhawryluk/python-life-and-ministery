@@ -1,4 +1,4 @@
-from gui import App
+from gui_main import App
 from database import DataBase
 
 if __name__ == "__main__":

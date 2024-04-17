@@ -1,25 +1,5 @@
 import customtkinter as ctk
 
-class App(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-        self.title("Reuniones Vida y Ministerio Teocrático")
-        self.geometry("930x810")
-
-        self.tab_view = TabView(master=self)
-        self.tab_view.grid(row=0, column=0, padx=10, pady=10)
-
-class TabView(ctk.CTkTabview):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
-
-        self.add("Reuniones")
-        self.add("Remplazos")
-        self.add("Participantes")
-
-        self.meetings_frame = MeetingsFrame(master=self.tab("Reuniones"))
-
-
 class MeetingsFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -43,7 +23,7 @@ class MeetingsFrame(ctk.CTkFrame):
 
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
-                self.checkbox = ctk.CTkCheckBox(master=master, text="", font=("Arial", 18), width=0, state=value["state"], text_color_disabled="#FFFFFF")
+                self.checkbox = ctk.CTkCheckBox(master=master, text="", font=("Arial", 16), width=0, state=value["state"], text_color_disabled="#FFFFFF")
                 self.checkbox.select()
                 self.option = ctk.CTkOptionMenu(master=master, values=["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias" , "Discurso estudiantil", "Análisis con el auditorio"], width=250)
                 self.option1 = ctk.CTkOptionMenu(master=master, values=value["values"], width=200)
@@ -59,7 +39,7 @@ class MeetingsFrame(ctk.CTkFrame):
                 self.button1.grid(row=i , column=5, padx=10, pady=10)
 
             else:
-                self.checkbox = ctk.CTkCheckBox(master=master, text=value["text"], font=("Arial", 18), state=value["state"], width=300, text_color_disabled="#FFFFFF")
+                self.checkbox = ctk.CTkCheckBox(master=master, text=value["text"], font=("Arial", 16), state=value["state"], width=300, text_color_disabled="#FFFFFF")
                 self.checkbox.select()
                 self.option = ctk.CTkOptionMenu(master=master, values=value["values"], width=200)
                 self.button = ctk.CTkButton(master=master, text="Reroll", width=30)
