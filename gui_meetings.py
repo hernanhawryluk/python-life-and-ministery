@@ -1,12 +1,15 @@
 import customtkinter as ctk
-import calendar
-import datetime
+from database import DataBase
+from utils_weeks import calculate_weeks
 
 class MeetingsFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
         self.widgets = {}
-        self.weeks = self.weeks()
+        self.generated_months = 0
+        self.weeks = calculate_weeks(self.generated_months)
+        print(self.weeks)
+        self.db = DataBase()
         self.assignations = [
             {"key": "precidency", "text": "Presidencia", "state": "disabled", "school": False, "values": ["Opción 1", "Opción 2", "Opción 3"]},
             {"key": "initial_pray","text": "Oración inicial", "state": "disabled", "school": False, "values": ["Opción 1", "Opción 2", "Opción 3"]}, 
@@ -45,62 +48,34 @@ class MeetingsFrame(ctk.CTkFrame):
                 self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, columnspan=2, padx=10, pady=10)
                 self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
 
-        self.buttonGenerate = ctk.CTkButton(master=master, text="Nueva Semana", width=300, height=40)
-        self.entryWeek = ctk.CTkEntry(master=master, width=270, height=40)
+        self.buttonGenerate = ctk.CTkButton(master=master, text="Saltar Semana", width=300, height=40, command=self.skip_week)
+        self.labelWeek = ctk.CTkLabel(master=master, text=self.weeks[0], width=270, height=40)
         print(self.weeks[0])
-        self.entryWeek.insert(0, self.weeks[0])
-        self.buttonSave = ctk.CTkButton(master=master, text="Guardar Semana", width=270, height=40)
+        self.buttonSave = ctk.CTkButton(master=master, text="Guardar Semana", width=270, height=40, command=self.save_week)
 
         self.buttonGenerate.grid(row=14, column=0, padx=10, pady=(20, 10),columnspan=2)
-        self.entryWeek.grid(row=14, column=2, padx=10, pady=(20, 10))
+        self.labelWeek.grid(row=14, column=2, padx=10, pady=(20, 10))
         self.buttonSave.grid(row=14, column=3, padx=10, pady=(20, 10), columnspan=1)
 
-    def weeks(self):
-        now = datetime.datetime.now()
-        current_year = now.year
-        current_month = now.month
-        months_in_spansh = [
-            "enero", "febrero", "marzo", "abril", "mayo", "junio",
-            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-        ]
+        self.generate_week()
 
-        if current_month == 12:
-            next_year = current_year + 1
-            next_month = 1
-        else:
-            next_year = current_year
-            next_month = current_month + 1
+    def generate_week(self):
+        self.all_witnesses = self.db.read_all_data()
+        self.studients = self.all_witnesses["studients"]
+        self.studients_plus = self.all_witnesses["studients_plus"]
+        self.ministers = self.all_witnesses["ministerials"]
+        self.ancients = self.all_witnesses["elders"]
+        print(self.studients)
 
-        first_day_next_month = datetime.date(next_year, next_month, 1)
-        first_monday = first_day_next_month + datetime.timedelta(days=(0 - first_day_next_month.weekday()) % 7)
-        days_in_the_month = calendar.monthrange(next_year, next_month)[1]
 
-        weeks = []
 
-        start_of_week = first_monday
-        for day in range(first_monday.day, days_in_the_month + 1):
-            date = datetime.date(next_year, next_month, day)
-            if date.weekday() == 0:
-                start_of_week = date
-            if date.weekday() == 6 or day == days_in_the_month:
-                end_of_week = date
-                weeks.append((start_of_week, end_of_week))
-                start_of_week = None
+    def skip_week(self):
+        self.weeks.pop(0)
+        if self.weeks == []:
+            self.generated_months += 1
+            self.weeks = calculate_weeks(self.generated_months)
+        self.labelWeek.configure(text=self.weeks[0])
+        pass
 
-        last_week = weeks[-1]
-        last_monday_of_the_month = last_week[0]
-        weeks[-1] = (last_monday_of_the_month, last_monday_of_the_month + datetime.timedelta(days=6))
-        
-        formatted_weeks = []
-        for i, week in enumerate(weeks, start=1):
-            current_month = months_in_spansh[week[0].month - 1]
-            if week[0].day < week[1].day:
-                formatted_weeks.append(f"Semana del {week[0].day} - {week[1].day} de {current_month.capitalize()}")
-            else:
-                if (week[1].month == 12):
-                    next_month = months_in_spansh[0]
-                else:
-                    next_month = months_in_spansh[week[0].month + 1]
-                formatted_weeks.append(f"Semana del {week[0].day} de {current_month.capitalize()} - {week[1].day} de {next_month.capitalize()}")
-        
-        return formatted_weeks
+    def save_week(self):
+        pass

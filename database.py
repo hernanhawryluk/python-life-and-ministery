@@ -18,7 +18,7 @@ class DataBase:
                 censored BOOLEAN, 
                 companion_only BOOLEAN, 
                 replacements BOOLEAN, 
-                replacements_date DATE,
+                replacements_date DATE DEFAULT NULL,
                 pray DATE DEFAULT NULL, 
                 read_bible DATE DEFAULT NULL, 
                 first DATE DEFAULT NULL, 
@@ -61,7 +61,6 @@ class DataBase:
     
     def modify_one(self, id, new_data):
         new_data.append(id)
-        print(new_data)
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         query = "UPDATE Witnesses SET name = ?, phone = ?, gender = ?, role = ?, absense = ?, censored = ?, companion_only = ?, replacements = ? WHERE id = ?"
@@ -70,9 +69,37 @@ class DataBase:
         cur.close()
 
     def delete_one(self, name):
-        print(name)
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         cur.execute("DELETE FROM Witnesses WHERE name = ?", (name,))
         con.commit()
         cur.close()
+
+    def read_all_data(self):
+        con = sqlite3.connect(self.table_name)
+        cur = con.cursor()
+        witnesses = {
+            "studients": {"read_bible": [], "first": [], "revisit": [], "course": []},
+            "studients_plus": {"pray": [], "read_book": []},
+            "ministerial": {"treasures": [],"pearls": [], "book": [], "random": []},
+            "elder": {"presidency": [], "needs": []}
+        }
+
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND censored = 0 ORDER BY read_bible ASC")
+        witnesses["studients"]["read_bible"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND censored = 0 ORDER BY first ASC")
+        witnesses["studients"]["first"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND censored = 0 ORDER BY revisit ASC")
+        witnesses["studients"]["revisit"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND censored = 0 ORDER BY course ASC")
+        witnesses["studients"]["course"] = cur.fetchall()
+
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante +'")
+        witnesses["studients_plus"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Ministerial'")
+        witnesses["ministerials"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano'")
+        witnesses["elders"] = cur.fetchall()
+
+        cur.close()
+        return witnesses
