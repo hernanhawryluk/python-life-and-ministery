@@ -2,7 +2,6 @@ import customtkinter as ctk
 from gui_meetings import MeetingsFrame
 from gui_replacements import ReplacementsFrame
 from gui_participants import ParticipantsFrame
-from database import DataBase
 
 class App(ctk.CTk):
     def __init__(self):
