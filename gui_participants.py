@@ -4,6 +4,7 @@ from database import DataBase
 class ParticipantsFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+
         self.db = DataBase()
         self.to_modify = None
         self.all_data = self.db.read_all_names()
@@ -13,13 +14,15 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.entry_phone = ctk.CTkEntry(master=master, placeholder_text="Numbero de telefono", width=205, height=40)
         self.option_gender = ctk.CTkOptionMenu(master=master, values=["Hombre", "Mujer"], width=205, height=40)
         self.option_role = ctk.CTkOptionMenu(master=master, values=["Estudiante", "Estudiante +", "Ministerial", "Anciano"], width=200, height=40)
-        self.checkbox_absence = ctk.CTkCheckBox(master=master, text="Ausente", font=("Arial", 14), width=205)
-        self.checkbox_censored = ctk.CTkCheckBox(master=master, text="Censurado", font=("Arial", 14), width=205)
+        self.checkbox_exclude = ctk.CTkCheckBox(master=master, text="Omitir", font=("Arial", 14), width=205)
+        self.checkbox_custom = ctk.CTkCheckBox(master=master, text="Custom", font=("Arial", 14), width=205)
         self.checkbox_companion_only = ctk.CTkCheckBox(master=master, text="Solo acompañante", font=("Arial", 14), width=205)
         self.checkbox_allow_replacement = ctk.CTkCheckBox(master=master, text="Acepta remplazos", font=("Arial", 14), width=205)
         self.button_clear = ctk.CTkButton(master=master, text="Limpiar Datos", width=430, height=40, command=self.clear_data)
         self.button_save = ctk.CTkButton(master=master, text="Guardar Cambios", width=430,height=40, command=self.save_data)
         self.option_modify = ctk.CTkOptionMenu(master=master, values=self.all_witnesses, width=430, height=40)
+        if self.all_witnesses == []: 
+            self.option_modify.set("Participantes")
         self.button_modify = ctk.CTkButton(master=master, text="Modificar Participante", width=205, height=40, command=self.modify_data)
         self.button_delete = ctk.CTkButton(master=master, text="Borrar Participante", width=205, height=40, command=self.delete_data)
 
@@ -27,8 +30,8 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.entry_phone.grid(row=0, column=1, padx=10, pady=10)
         self.option_gender.grid(row=0, column=2, padx=10, pady=10)
         self.option_role.grid(row=0, column=3, padx=10, pady=10)
-        self.checkbox_absence.grid(row=1, column=0, padx=10, pady=10)
-        self.checkbox_censored.grid(row=1, column=1, padx=10, pady=10)
+        self.checkbox_exclude.grid(row=1, column=0, padx=10, pady=10)
+        self.checkbox_custom.grid(row=1, column=1, padx=10, pady=10)
         self.checkbox_companion_only.grid(row=1, column=2, padx=10, pady=10)
         self.checkbox_allow_replacement.grid(row=1, column=3, padx=10, pady=10)
         self.button_clear.grid(row=2, column=0, padx=10, pady=10, columnspan=2)
@@ -43,8 +46,8 @@ class ParticipantsFrame(ctk.CTkFrame):
             self.entry_phone.get(),
             self.option_gender.get(),
             self.option_role.get(),
-            self.checkbox_absence.get(),
-            self.checkbox_censored.get(),
+            self.checkbox_exclude.get(),
+            self.checkbox_custom.get(),
             self.checkbox_companion_only.get(),
             self.checkbox_allow_replacement.get()
         ]
@@ -67,8 +70,8 @@ class ParticipantsFrame(ctk.CTkFrame):
     def clear_data(self):
         self.entry_name.delete(0, "end")
         self.entry_phone.delete(0, "end")
-        self.checkbox_absence.deselect()
-        self.checkbox_censored.deselect()
+        self.checkbox_exclude.deselect()
+        self.checkbox_custom.deselect()
         self.checkbox_companion_only.deselect()
         self.checkbox_allow_replacement.deselect()
 
@@ -80,8 +83,8 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.entry_phone.insert(0, witness[2])
         self.option_gender.set(witness[3])
         self.option_role.set(witness[4])
-        if witness[5] == 1: self.checkbox_absence.select()
-        if witness[6] == 1: self.checkbox_censored.select()
+        if witness[5] == 1: self.checkbox_exclude.select()
+        if witness[6] == 1: self.checkbox_custom.select()
         if witness[7] == 1: self.checkbox_companion_only.select()
         if witness[8] == 1: self.checkbox_allow_replacement.select()
         self.all_witnesses.remove(name)
@@ -91,6 +94,9 @@ class ParticipantsFrame(ctk.CTkFrame):
         name = self.option_modify.get()
         self.db.delete_one(name)
         self.all_witnesses.remove(name)
-        self.option_modify.configure(values=self.all_witnesses)
-        self.option_modify.set(self.all_witnesses[0])
+        if self.all_witnesses == []: 
+            self.option_modify.set("Participantes")
+        else:
+            self.option_modify.configure(values=self.all_witnesses)
+            self.option_modify.set(self.all_witnesses[0])
 

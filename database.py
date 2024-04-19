@@ -14,22 +14,26 @@ class DataBase:
                 phone TEXT, 
                 gender TEXT, 
                 role TEXT, 
-                absense BOOLEAN, 
-                censored BOOLEAN, 
+                exclude BOOLEAN, 
+                custom BOOLEAN, 
                 companion_only BOOLEAN, 
                 replacements BOOLEAN, 
                 replacements_date DATE DEFAULT NULL,
-                pray DATE DEFAULT NULL, 
+                initial_pray DATE DEFAULT NULL, 
+                ending_pray DATE DEFAULT NULL,
                 read_bible DATE DEFAULT NULL, 
                 first DATE DEFAULT NULL, 
                 revisit DATE DEFAULT NULL, 
                 course DATE DEFAULT NULL, 
                 speech DATE DEFAULT NULL, 
+                companion_male DATE DEFAULT NULL, 
+                companion_female DATE DEFAULT NULL,
                 read_book DATE DEFAULT NULL, 
                 treasures DATE DEFAULT NULL, 
                 pearls DATE DEFAULT NULL, 
                 book DATE DEFAULT NULL, 
-                random DATE DEFAULT NULL, 
+                random_1 DATE DEFAULT NULL, 
+                random_2 DATE DEFAULT NULL,
                 presidency DATE DEFAULT NULL, 
                 needs DATE DEFAULT NULL
                 )""")
@@ -38,7 +42,7 @@ class DataBase:
     def create_new(self, values):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
-        query = "INSERT INTO Witnesses (name, phone, gender, role, absense, censored, companion_only, replacements) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO Witnesses (name, phone, gender, role, exclude, custom, companion_only, replacements) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         cur.execute(query, values)
         con.commit()
         cur.close()
@@ -63,7 +67,7 @@ class DataBase:
         new_data.append(id)
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
-        query = "UPDATE Witnesses SET name = ?, phone = ?, gender = ?, role = ?, absense = ?, censored = ?, companion_only = ?, replacements = ? WHERE id = ?"
+        query = "UPDATE Witnesses SET name = ?, phone = ?, gender = ?, role = ?, exclude = ?, custom = ?, companion_only = ?, replacements = ? WHERE id = ?"
         cur.execute(query, new_data)
         con.commit()
         cur.close()
@@ -79,27 +83,49 @@ class DataBase:
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         witnesses = {
-            "studients": {"read_bible": [], "first": [], "revisit": [], "course": []},
-            "studients_plus": {"pray": [], "read_book": []},
-            "ministerial": {"treasures": [],"pearls": [], "book": [], "random": []},
-            "elder": {"presidency": [], "needs": []}
+            "studients": {"read_bible": [], "first": [], "revisit": [], "course": [], "speech": [],"companion_male": [], "companion_female": []},
+            "studients_plus": {"initial_pray": [], "ending_pray": [], "read_book": []},
+            "ministerials": {"treasures": [],"pearls": [], "book": [], "random_1": [], "random_2": []},
+            "elders": {"presidency": [], "needs": []}
         }
 
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND censored = 0 ORDER BY read_bible ASC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY read_bible ASC")
         witnesses["studients"]["read_bible"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND censored = 0 ORDER BY first ASC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY first ASC")
         witnesses["studients"]["first"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND censored = 0 ORDER BY revisit ASC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY revisit ASC")
         witnesses["studients"]["revisit"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND censored = 0 ORDER BY course ASC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY course ASC")
         witnesses["studients"]["course"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY speech ASC")
+        witnesses["studients"]["speech"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND exclude = 0 ORDER BY companion_male ASC")
+        witnesses["studients"]["companion_male"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND exclude = 0 ORDER BY companion_female ASC")
+        witnesses["studients"]["companion_female"] = cur.fetchall()
 
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante +'")
-        witnesses["studients_plus"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Ministerial'")
-        witnesses["ministerials"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano'")
-        witnesses["elders"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial') AND exclude = 0 ORDER BY read_book ASC")
+        witnesses["studients_plus"]["read_book"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY initial_pray ASC")
+        witnesses["studients_plus"]["initial_pray"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY ending_pray ASC")
+        witnesses["studients_plus"]["ending_pray"] = cur.fetchall()
+
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY treasures ASC")
+        witnesses["ministerials"]["treasures"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY pearls ASC")
+        witnesses["ministerials"]["pearls"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY book ASC")
+        witnesses["ministerials"]["book"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY random_1 ASC")
+        witnesses["ministerials"]["random_1"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY random_2 ASC")
+        witnesses["ministerials"]["random_2"] = cur.fetchall()
+
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY presidency ASC")
+        witnesses["elders"]["presidency"] = cur.fetchall()
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY needs ASC")
+        witnesses["elders"]["needs"] = cur.fetchall()
 
         cur.close()
         return witnesses
