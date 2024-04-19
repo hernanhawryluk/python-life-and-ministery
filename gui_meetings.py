@@ -9,116 +9,184 @@ class MeetingsFrame(ctk.CTkFrame):
         self.generated_months = 0
         self.weeks = calculate_weeks(self.generated_months)
         self.db = DataBase()
+        self.witnesses_excluded = []
         self.assignations = [
-            {"key": "presidency", "text": "Presidencia", "state": "disabled", "school": False, "role": "elders", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "initial_pray","text": "Oración inicial", "state": "disabled", "school": False, "role": "studients_plus", "values": ["Opción 1", "Opción 2", "Opción 3"]}, 
-            {"key": "treasures", "text": "Tesoros de la Biblia", "state": "disabled", "school": False, "role": "ministerials", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "pearls", "text": "Busquemos Perlas Escondidas", "state": "disabled", "school": False, "role": "ministerials", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "read_bible","text": "Lectura de la Biblia", "state": "disabled", "school": False, "role": "studients", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "school_1", "text": "Escuela Asignación 1", "state": "normal", "school": True, "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "school_2", "text": "Escuela Asignación 2", "state": "normal", "school": True, "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "school_3", "text": "Escuela Asignación 3", "state": "normal", "school": True, "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "school_4", "text": "Escuela Asignación 4", "state": "normal", "school": True, "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "random_1", "text": "Asignación 1", "state": "normal", "school": False, "role": "ministerials", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "random_2", "text": "Asignación 2", "state": "normal", "school": False, "role": "ministerials", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "book", "text": "Estudio Biblico de Congregación", "state": "normal", "school": False, "role": "ministerials", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "read_book", "text": "Lectura en Estudio Biblico", "state": "normal", "school": False, "role": "studients_plus", "values": ["Opción 1", "Opción 2", "Opción 3"]},
-            {"key": "ending_pray", "text": "Oración final", "state": "disabled", "school": False, "role": "studients_plus", "values": ["Opción 1", "Opción 2", "Opción 3"]},
+            {"key": "presidency", "text": "Presidencia", "state": "disabled", "school": False, "role": "elders"},
+            {"key": "initial_pray","text": "Oración inicial", "state": "disabled", "school": False, "role": "studients_plus"}, 
+            {"key": "treasures", "text": "Tesoros de la Biblia", "state": "disabled", "school": False, "role": "ministerials"},
+            {"key": "pearls", "text": "Busquemos Perlas Escondidas", "state": "disabled", "school": False, "role": "ministerials"},
+            {"key": "read_bible","text": "Lectura de la Biblia", "state": "disabled", "school": False, "role": "studients"},
+            {"key": "school_1", "text": "Escuela Asignación 1", "state": "normal", "school": True, "role": "studients", "default": "Empiece conversaciones"},
+            {"key": "school_2", "text": "Escuela Asignación 2", "state": "normal", "school": True, "role": "studients", "default": "Haga revisitas"},
+            {"key": "school_3", "text": "Escuela Asignación 3", "state": "normal", "school": True, "role": "studients", "default": "Haga discípulos"},
+            {"key": "school_4", "text": "Escuela Asignación 4", "state": "normal", "school": True, "role": "studients", "default": "Discurso estudiantil"},
+            {"key": "random_1", "text": "Asignación 1", "state": "normal", "school": False, "role": "ministerials"},
+            {"key": "random_2", "text": "Asignación 2", "state": "normal", "school": False, "role": "ministerials"},
+            {"key": "book", "text": "Estudio Biblico de Congregación", "state": "normal", "school": False, "role": "ministerials"},
+            {"key": "read_book", "text": "Lectura en Estudio Biblico", "state": "normal", "school": False, "role": "studients_plus"},
+            {"key": "ending_pray", "text": "Oración final", "state": "disabled", "school": False, "role": "studients_plus"},
             ]
         
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
                 self.widgets["checkbox_" + self.assignations[i]["key"]] = ctk.CTkCheckBox(master=master, text="", font=("Arial", 16), width=0, state=value["state"], text_color_disabled="#FFFFFF")
                 self.widgets["checkbox_" + self.assignations[i]["key"]].select()
-                self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias" , "Discurso estudiantil", "Análisis con el auditorio"], width=250)
-                self.widgets["option1_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=value["values"], width=270)
-                self.widgets["option2_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=value["values"], width=270)
+                self.widgets["option_type_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias" , "Discurso estudiantil", "Análisis con el auditorio"], command=self.choose_assignation_toggle, width=250)
+                self.widgets["option_type_" + self.assignations[i]["key"]].set(value["default"])
+                self.widgets["option0_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.manual_pick, width=270)
+                self.widgets["option1_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.manual_pick, width=270)
 
                 self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, padx=10, pady=10)
-                self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10, sticky="nsew")
-                self.widgets["option1_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
-                self.widgets["option2_" + self.assignations[i]["key"]].grid(row=i, column=3, padx=10, pady=10)
+                self.widgets["option_type_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10, sticky="nsew")
+                self.widgets["option0_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
+                self.widgets["option1_" + self.assignations[i]["key"]].grid(row=i, column=3, padx=10, pady=10)
 
             else:
                 self.widgets["checkbox_" + self.assignations[i]["key"]] = ctk.CTkCheckBox(master=master, text=value["text"], font=("Arial", 16), state=value["state"], width=300, text_color_disabled="#FFFFFF")
                 self.widgets["checkbox_" + self.assignations[i]["key"]].select()
-                self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=value["values"], width=270)
+                self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.manual_pick, width=270)
 
                 self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, columnspan=2, padx=10, pady=10)
                 self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
 
-        self.buttonGenerate = ctk.CTkButton(master=master, text="Saltar Semana", width=300, height=40, command=self.skip_week)
-        self.labelWeek = ctk.CTkLabel(master=master, text=self.weeks[0], width=270, height=40)
-        self.buttonSave = ctk.CTkButton(master=master, text="Guardar Semana", width=270, height=40, command=self.save_week)
+        self.button_skip_week = ctk.CTkButton(master=master, text="Saltar Semana", width=300, height=40, command=self.skip_week)
+        self.label_week = ctk.CTkLabel(master=master, text=self.weeks[0], width=270, height=40)
+        self.button_next_or_save = ctk.CTkButton(master=master, text="Generar Semana", width=270, height=40, command=self.main_button)
 
-        self.buttonGenerate.grid(row=14, column=0, padx=10, pady=(20, 10),columnspan=2)
-        self.labelWeek.grid(row=14, column=2, padx=10, pady=(20, 10))
-        self.buttonSave.grid(row=14, column=3, padx=10, pady=(20, 10), columnspan=1)
+        self.button_skip_week.grid(row=14, column=0, padx=10, pady=(20, 10),columnspan=2)
+        self.label_week.grid(row=14, column=2, padx=10, pady=(20, 10))
+        self.button_next_or_save.grid(row=14, column=3, padx=10, pady=(20, 10), columnspan=1)
 
-        self.generate_week()
+        self.choose_assignation_toggle(choice="tkOptionMenu")
+        self.generate_options()
 
-    def generate_week(self):
-        self.all_witnesses = self.db.read_all_data()
-        self.studients = self.all_witnesses["studients"]
-        self.studients_plus = self.all_witnesses["studients_plus"]
-        self.ministers = self.all_witnesses["ministerials"]
-        self.ancients = self.all_witnesses["elders"]
+    def manual_pick(self, choice):
+        self.witnesses_excluded.append(choice)
 
-        witnesses_used = []
-        for i, value in enumerate(self.assignations):
-            if (value["school"] == True):
-                pass
+    def choose_assignation_toggle(self, choice):
+        for i in range(1, 5):
+            option_type = self.widgets[f"option_type_school_{i}"]
+            option_secondary = self.widgets[f"option1_school_{i}"]
+            if option_type.get() in ["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias"]:
+                option_secondary.grid()
             else:
-                if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
+                option_secondary.grid_remove()
+
+    def main_button(self):
+        if self.button_next_or_save.cget("text") == "Generar Semana":
+            self.button_next_or_save.configure(text="Guardar Semana")
+            self.generate_week()
+        else:
+            self.button_next_or_save.configure(text="Generar Semana")
+            self.save_week()
+
+    def assignation_conversor(self, name):
+        switcher = {
+            "Empiece conversaciones": "first",
+            "Haga revisitas": "revisit",
+            "Haga discípulos": "course",
+            "Explique sus creencias": "explain",
+            "Discurso estudiantil": "speech",
+            "Análisis con el auditorio": "masters",
+        }
+        return switcher[name]
+
+    def generate_options(self):
+        self.all_witnesses = self.db.read_all_data()
+        for i, value in enumerate(self.assignations):
+            if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
+                if (value["school"] == True):
+                    which_assignation = self.assignation_conversor(self.widgets["option_type_" + self.assignations[i]["key"]].get())
+                    assignation_options = None
+                    if which_assignation == "masters":
+                        assignation_options = self.all_witnesses["ministerials"]["masters"]
+                    else:
+                        assignation_options = self.all_witnesses[self.assignations[i]["role"]][which_assignation]
+                    assignation_options = [item[1] for item in assignation_options]
+                    self.widgets["option0_" + self.assignations[i]["key"]].configure(values=assignation_options)
+                    self.widgets["option1_" + self.assignations[i]["key"]].configure(values=assignation_options)
+                    pass
+                else:
                     assignation_options = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
                     assignation_options = [item[1] for item in assignation_options]
                     self.widgets["option_" + self.assignations[i]["key"]].configure(values=assignation_options)
 
-                    choosen_witness = 0
-                    
-                    witnesses_quantity = len(self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]])
 
-                    print(witnesses_quantity)
-                    if witnesses_quantity > 0:
-                        for position in range(witnesses_quantity):
-                            witness_id = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]][position][0] # save id of first witness
-                            if witness_id not in witnesses_used:
-                                choosen_witness = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]][position]
-                                witnesses_used.append(choosen_witness[0])
-                                break
-                        if choosen_witness != 0:
-                            self.widgets["option_" + self.assignations[i]["key"]].set(choosen_witness[1])
+    def generate_week(self):
+        self.generate_options()
+        witnesses_used = []
+        for i, value in enumerate(self.assignations):
+            if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
+                if (value["school"] == True):
+                    if self.widgets["option0_" + self.assignations[i]["key"]].get() == "":
+                        which_assignation = self.assignation_conversor(self.widgets["option_type_" + self.assignations[i]["key"]].get())
+                        posible_participants = None
+                        if which_assignation == "masters":
+                            posible_participants = self.all_witnesses["ministerials"]["masters"]
+                        else:
+                            posible_participants = self.all_witnesses[self.assignations[i]["role"]][which_assignation]
+                        choosen_witnesses = self.choose_participant(posible_participants, witnesses_used)
+                        choosen_companion = None
+                        if which_assignation in ["first", "revisit", "course", "explain"]:
+                            gender = choosen_witnesses[3]
+                            assignation = self.all_witnesses[self.assignations[i]["role"]]
+                            choosen_companion = self.choose_companion(gender, assignation, witnesses_used)
+
+                        if choosen_witnesses != None:
+                            self.widgets["option0_" + self.assignations[i]["key"]].set(choosen_witnesses[1])
+                        if choosen_companion != None:
+                            self.widgets["option1_" + self.assignations[i]["key"]].set(choosen_companion[1])
+
+                else:
+                    if self.widgets["option_" + self.assignations[i]["key"]].get() == "":
+                        posible_participants = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
+                        choosen_witnesses = self.choose_participant(posible_participants, witnesses_used)
+
+                        if choosen_witnesses != None:
+                            self.widgets["option_" + self.assignations[i]["key"]].set(choosen_witnesses[1])
                         else:
                             self.widgets["option_" + self.assignations[i]["key"]].set("")
-                        print(choosen_witness)
-                    else:
-                        self.widgets["option_" + self.assignations[i]["key"]].set("")
+                
 
-        
-        
-        
-
-        
-        # skip_witness = 0
-        # witness_id = self.all_witnesses[self.assignations[0]["role"]][self.assignations[0]["key"]][0][0]
-        # while True:
-        #     if witness_id in witnesses_used:
-        #         skip_witness += 1
-        #     else:
-        #         break
-        # print(self.all_witnesses[self.assignations[0]["role"]][self.assignations[0]["key"]][0 + skip_witness][1]) # shows name
-        # witnesses_used.append(self.all_witnesses[self.assignations[0]["role"]][self.assignations[0]["key"]][0 + skip_witness][0]) # holds ID
-
-
-
+    def choose_participant(self, posible_participants, witnesses_used):
+        for witness in posible_participants:
+            if witness[0] not in witnesses_used and witness[1] not in self.witnesses_excluded:
+                witnesses_used.append(witness[0])
+                return witness
+        return None
+    
+    def choose_companion(self, gender, assignation, witnesses_used):
+        posible_companions = None
+        if gender == "Mujer":
+            posible_companions = assignation["companion_female"]
+        else:
+            posible_companions = assignation["companion_male"]
+        for witness in posible_companions:
+            if witness[0] not in witnesses_used and witness[1] not in self.witnesses_excluded:
+                witnesses_used.append(witness[0])
+                return witness
+        return None
 
     def skip_week(self):
         self.weeks.pop(0)
         if self.weeks == []:
             self.generated_months += 1
             self.weeks = calculate_weeks(self.generated_months)
-        self.labelWeek.configure(text=self.weeks[0])
-        pass
+        self.label_week.configure(text=self.weeks[0])
+        self.button_next_or_save.configure(text="Generar Semana")
+        self.witnesses_excluded = []
+
+        self.generate_options()
+        for i, value in enumerate(self.assignations):
+            if (value["school"] == True):
+                self.widgets["checkbox_" + self.assignations[i]["key"]].select()
+                self.widgets["option0_" + self.assignations[i]["key"]].set("")
+                self.widgets["option1_" + self.assignations[i]["key"]].set("")
+            else:
+                self.widgets["checkbox_" + self.assignations[i]["key"]].select()
+                self.widgets["option_" + self.assignations[i]["key"]].set("")
 
     def save_week(self):
-        pass
+        print("Saving the week")
+        self.skip_week()
+        
