@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 
 class DataBase:
     def __init__(self):
@@ -92,47 +93,63 @@ class DataBase:
             "elders": {"presidency": [], "needs": []}
         }
 
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation DESC, read_bible DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation DESC, read_bible ASC")
         witnesses["studients"]["read_bible"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, first DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, first ASC")
         witnesses["studients"]["first"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, revisit DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, revisit ASC")
         witnesses["studients"]["revisit"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, course DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, course ASC")
         witnesses["studients"]["course"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY last_assignation DESC, explain DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY last_assignation DESC, explain ASC")
         witnesses["studients"]["explain"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation DESC, speech DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation DESC, speech ASC")
         witnesses["studients"]["speech"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation DESC, companion_male DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation ASC, companion_male ASC")
         witnesses["studients"]["companion_male"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Mujer' AND exclude = 0 ORDER BY last_assignation DESC, companion_female DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Mujer' AND exclude = 0 ORDER BY last_assignation ASC, companion_female ASC")
         witnesses["studients"]["companion_female"] = cur.fetchall()
 
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial') AND exclude = 0 ORDER BY last_assignation DESC, read_book DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial') AND exclude = 0 ORDER BY last_assignation DESC, read_book ASC")
         witnesses["studients_plus"]["read_book"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, initial_pray DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, initial_pray ASC")
         witnesses["studients_plus"]["initial_pray"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, ending_pray DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, ending_pray ASC")
         witnesses["studients_plus"]["ending_pray"] = cur.fetchall()
 
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, treasures DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, treasures ASC")
         witnesses["ministerials"]["treasures"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, pearls DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, pearls ASC")
         witnesses["ministerials"]["pearls"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, book DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, book ASC")
         witnesses["ministerials"]["book"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, random_1 DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, random_1 ASC")
         witnesses["ministerials"]["random_1"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, random_2 DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, random_2 ASC")
         witnesses["ministerials"]["random_2"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, masters DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, masters ASC")
         witnesses["ministerials"]["masters"] = cur.fetchall()
 
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY last_assignation DESC, presidency DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY last_assignation DESC, presidency ASC")
         witnesses["elders"]["presidency"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY last_assignation DESC, needs DESC")
+        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY last_assignation DESC, needs ASC")
         witnesses["elders"]["needs"] = cur.fetchall()
 
         cur.close()
         return witnesses
+    
+    def write_data(self, data_dict):
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+
+        for data in data_dict:
+            print(data)
+            con = sqlite3.connect(self.table_name)
+            cur = con.cursor()
+            if len(data) == 3:
+                cur.execute(f"UPDATE Witnesses SET '{data[0]}' = '{today}' WHERE name = '{data[1]}'")
+                cur.execute(f"UPDATE Witnesses SET companion_male = '{today}', companion_female = '{today}' WHERE name = '{data[2]}'")
+            else:
+                cur.execute(f"UPDATE Witnesses SET '{data[0]}' = '{today}' WHERE name = '{data[1]}'")
+            con.commit()
+            cur.close()
+

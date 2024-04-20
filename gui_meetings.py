@@ -80,7 +80,7 @@ class MeetingsFrame(ctk.CTkFrame):
             self.button_next_or_save.configure(text="Generar Semana")
             self.save_week()
 
-    def assignation_conversor(self, name):
+    def school_switcher(self, name):
         switcher = {
             "Empiece conversaciones": "first",
             "Haga revisitas": "revisit",
@@ -96,7 +96,7 @@ class MeetingsFrame(ctk.CTkFrame):
         for i, value in enumerate(self.assignations):
             if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
                 if (value["school"] == True):
-                    which_assignation = self.assignation_conversor(self.widgets["option_type_" + self.assignations[i]["key"]].get())
+                    which_assignation = self.school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
                     assignation_options = None
                     if which_assignation == "masters":
                         assignation_options = self.all_witnesses["ministerials"]["masters"]
@@ -119,7 +119,7 @@ class MeetingsFrame(ctk.CTkFrame):
             if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
                 if (value["school"] == True):
                     if self.widgets["option0_" + self.assignations[i]["key"]].get() == "":
-                        which_assignation = self.assignation_conversor(self.widgets["option_type_" + self.assignations[i]["key"]].get())
+                        which_assignation = self.school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
                         posible_participants = None
                         if which_assignation == "masters":
                             posible_participants = self.all_witnesses["ministerials"]["masters"]
@@ -129,8 +129,8 @@ class MeetingsFrame(ctk.CTkFrame):
                         choosen_companion = None
                         if which_assignation in ["first", "revisit", "course", "explain"]:
                             gender = choosen_witnesses[3]
-                            assignation = self.all_witnesses[self.assignations[i]["role"]]
-                            choosen_companion = self.choose_companion(gender, assignation, witnesses_used)
+                            possible_companion = self.all_witnesses[self.assignations[i]["role"]]
+                            choosen_companion = self.choose_companion(gender, possible_companion, witnesses_used)
 
                         if choosen_witnesses != None:
                             self.widgets["option0_" + self.assignations[i]["key"]].set(choosen_witnesses[1])
@@ -155,12 +155,12 @@ class MeetingsFrame(ctk.CTkFrame):
                 return witness
         return None
     
-    def choose_companion(self, gender, assignation, witnesses_used):
+    def choose_companion(self, gender, possible_companion, witnesses_used):
         posible_companions = None
         if gender == "Mujer":
-            posible_companions = assignation["companion_female"]
+            posible_companions = possible_companion["companion_female"]
         else:
-            posible_companions = assignation["companion_male"]
+            posible_companions = possible_companion["companion_male"]
         for witness in posible_companions:
             if witness[0] not in witnesses_used and witness[1] not in self.witnesses_excluded:
                 witnesses_used.append(witness[0])
@@ -188,5 +188,63 @@ class MeetingsFrame(ctk.CTkFrame):
 
     def save_week(self):
         print("Saving the week")
+        self.write_to_file("--------------------------------------------")
+        self.write_to_file(self.label_week.cget("text"))
+        self.write_to_file("--------------------------------------------\n")
+        for i, value in enumerate(self.assignations):
+            if (value["school"] == True):
+                checkbox = self.widgets["checkbox_" + self.assignations[i]["key"]].get()
+                if checkbox:
+                    assignation = self.widgets["option_type_" + self.assignations[i]["key"]].get()    
+                    assigned = self.widgets["option0_" + self.assignations[i]["key"]].get()
+                    assistant = self.widgets["option1_" + self.assignations[i]["key"]].get()
+                    self.write_to_file(assignation + ": " + assigned + " - " + assistant)
+            else:
+                assignation = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
+                assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
+                self.write_to_file(assignation + ": " + assigned)
+        self.write_to_file("\n\n")
+
+        print("Saving in database")
+        data_dict = []
+        for i, value in enumerate(self.assignations):
+            if (value["school"] == True):
+                checkbox = self.widgets["checkbox_" + self.assignations[i]["key"]].get()
+                if checkbox:
+                    assignation = self.widgets["option_type_" + self.assignations[i]["key"]].get()
+                    assignation = self.school_switcher(assignation)
+                    assigned = self.widgets["option0_" + self.assignations[i]["key"]].get()
+                    assistant = self.widgets["option1_" + self.assignations[i]["key"]].get()
+                    data_dict.append([assignation, assigned, assistant])
+                    
+            else:
+                assignation = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
+                assignation = self.meeting_switcher(assignation)
+                assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
+                data_dict.append([assignation, assigned])
+
+        self.db.write_data(data_dict)
         self.skip_week()
+            
+    def meeting_switcher(self, assignation):
+        switcher = {
+            "Presidencia": "presidency",
+            "Oración inicial": "initial_pray",
+            "Tesoros de la Biblia": "treasures",
+            "Busquemos Perlas Escondidas": "pearls",
+            "Lectura de la Biblia": "read_bible",
+            "Asignación 1": "random_1",
+            "Asignación 2": "random_2",
+            "Estudio Biblico de Congregación": "book",
+            "Lectura en Estudio Biblico": "read_book",
+            "Oración final": "ending_pray",
+        }
+        return switcher[assignation]
+
+    def write_to_file(self, text):
+        with open('reuniones.txt', 'a') as archivo:
+            archivo.write(text + "\n")
+
+
+        
         
