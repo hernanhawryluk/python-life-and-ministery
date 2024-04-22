@@ -31,10 +31,10 @@ class MeetingsFrame(ctk.CTkFrame):
             if (value["school"] == True):
                 self.widgets["checkbox_" + self.assignations[i]["key"]] = ctk.CTkCheckBox(master=master, text="", font=("Arial", 16), width=0, state=value["state"], text_color_disabled="#FFFFFF")
                 self.widgets["checkbox_" + self.assignations[i]["key"]].select()
-                self.widgets["option_type_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias" , "Discurso estudiantil", "Análisis con el auditorio"], command=self.choose_assignation_toggle, width=250)
+                self.widgets["option_type_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias" , "Discurso estudiantil", "Análisis con el auditorio"], command=self.option_choose_assignation, width=250)
                 self.widgets["option_type_" + self.assignations[i]["key"]].set(value["default"])
-                self.widgets["option0_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.manual_pick, width=270)
-                self.widgets["option1_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.manual_pick, width=270)
+                self.widgets["option0_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
+                self.widgets["option1_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
 
                 self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, padx=10, pady=10)
                 self.widgets["option_type_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10, sticky="nsew")
@@ -44,40 +44,50 @@ class MeetingsFrame(ctk.CTkFrame):
             else:
                 self.widgets["checkbox_" + self.assignations[i]["key"]] = ctk.CTkCheckBox(master=master, text=value["text"], font=("Arial", 16), state=value["state"], width=300, text_color_disabled="#FFFFFF")
                 self.widgets["checkbox_" + self.assignations[i]["key"]].select()
-                self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.manual_pick, width=270)
+                self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
 
                 self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, columnspan=2, padx=10, pady=10)
                 self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
 
-        self.button_skip_week = ctk.CTkButton(master=master, text="Saltar Semana", width=300, height=40, command=self.skip_week)
+        self.secondary_button = ctk.CTkButton(master=master, text="Saltar Semana", width=300, height=40, command=self.secondary_button_action)
         self.label_week = ctk.CTkLabel(master=master, text=self.weeks[0], width=270, height=40)
-        self.button_next_or_save = ctk.CTkButton(master=master, text="Generar Semana", width=270, height=40, command=self.main_button)
+        self.main_button = ctk.CTkButton(master=master, text="Generar Semana", width=270, height=40, command=self.main_button_action)
 
-        self.button_skip_week.grid(row=14, column=0, padx=10, pady=(20, 10),columnspan=2)
+        self.secondary_button.grid(row=14, column=0, padx=10, pady=(20, 10),columnspan=2)
         self.label_week.grid(row=14, column=2, padx=10, pady=(20, 10))
-        self.button_next_or_save.grid(row=14, column=3, padx=10, pady=(20, 10), columnspan=1)
+        self.main_button.grid(row=14, column=3, padx=10, pady=(20, 10), columnspan=1)
 
-        self.choose_assignation_toggle(choice="tkOptionMenu")
+        self.option_choose_assignation(choice="tkOptionMenu")
         self.generate_options()
 
-    def manual_pick(self, choice):
+    def option_choose_participant(self, choice):
         self.witnesses_excluded.append(choice)
 
-    def choose_assignation_toggle(self, choice):
+    def option_choose_assignation(self, choice):
         for i in range(1, 5):
             option_type = self.widgets[f"option_type_school_{i}"]
-            option_secondary = self.widgets[f"option1_school_{i}"]
             if option_type.get() in ["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias"]:
-                option_secondary.grid()
+                self.widgets[f"option1_school_{i}"].grid()
             else:
-                option_secondary.grid_remove()
+                self.widgets[f"option1_school_{i}"].grid_remove()
 
-    def main_button(self):
-        if self.button_next_or_save.cget("text") == "Generar Semana":
-            self.button_next_or_save.configure(text="Guardar Semana")
+    def secondary_button_action(self):
+        if self.secondary_button.cget("text") == "Saltar Semana":
+            self.main_button.configure(text="Generar Semana")
+            self.skip_week()
+        elif (self.secondary_button.cget("text") == "Cancelar"):
+            self.main_button.configure(text="Generar Semana")
+            self.secondary_button.configure(text="Saltar Semana")
+            self.clear_widgets()
+
+    def main_button_action(self):
+        if self.main_button.cget("text") == "Generar Semana":
+            self.main_button.configure(text="Guardar Semana")
+            self.secondary_button.configure(text="Cancelar")
             self.generate_week()
         else:
-            self.button_next_or_save.configure(text="Generar Semana")
+            self.main_button.configure(text="Generar Semana")
+            self.secondary_button.configure(text="Saltar Semana")
             self.save_week()
 
     def school_switcher(self, name):
@@ -173,9 +183,10 @@ class MeetingsFrame(ctk.CTkFrame):
             self.generated_months += 1
             self.weeks = calculate_weeks(self.generated_months)
         self.label_week.configure(text=self.weeks[0])
-        self.button_next_or_save.configure(text="Generar Semana")
         self.witnesses_excluded = []
+        self.clear_widgets()
 
+    def clear_widgets(self):
         self.generate_options()
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
@@ -187,7 +198,6 @@ class MeetingsFrame(ctk.CTkFrame):
                 self.widgets["option_" + self.assignations[i]["key"]].set("")
 
     def save_week(self):
-        print("Saving the week")
         self.write_to_file("--------------------------------------------")
         self.write_to_file(self.label_week.cget("text"))
         self.write_to_file("--------------------------------------------\n")
@@ -205,7 +215,6 @@ class MeetingsFrame(ctk.CTkFrame):
                 self.write_to_file(assignation + ": " + assigned)
         self.write_to_file("\n\n")
 
-        print("Saving in database")
         data_dict = []
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
