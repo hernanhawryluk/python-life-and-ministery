@@ -1,5 +1,5 @@
-from gui_main import App
-from database import DataBase
+from src.gui_main import App
+from src.database import DataBase
 
 if __name__ == "__main__":
     db = DataBase()
