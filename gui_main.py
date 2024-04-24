@@ -7,16 +7,16 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Reuniones Vida y Ministerio Teocrático")
-        self.geometry("950x820")
+        self.geometry("950x866")
 
         self.tab_view = TabView(master=self, anchor="nw", command=self.change_tab)
         self.tab_view.grid(row=0, column=0, padx=20, pady=10, columnspan=4)
         
     def change_tab(self):
         if self.tab_view.get() == "Reuniones":
-            self.geometry("950x820")
+            self.geometry("950x866")
         elif self.tab_view.get() == "Remplazos":
-            self.geometry("950x820")
+            self.geometry("950x866")
         elif self.tab_view.get() == "Participantes":
             self.geometry("950x300")
 

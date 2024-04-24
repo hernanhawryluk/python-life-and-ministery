@@ -61,6 +61,7 @@ class ReplacementsFrame(ctk.CTkFrame):
     def option_choose_participant(self, choice):
         self.witnesses_excluded.append(choice)
 
+
     def option_choose_assignation(self, choice):
         for i in range(1, 5):
             option_type = self.widgets[f"option_type_school_{i}"]
@@ -68,26 +69,26 @@ class ReplacementsFrame(ctk.CTkFrame):
                 self.widgets[f"option1_school_{i}"].grid()
             else:
                 self.widgets[f"option1_school_{i}"].grid_remove()
+                
 
     def generate_options(self):
         self.all_witnesses = self.db.read_all_data()
         for i, value in enumerate(self.assignations):
-            if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
-                if (value["school"] == True):
-                    which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
-                    assignation_options = None
-                    if which_assignation == "masters":
-                        assignation_options = self.all_witnesses["ministerials"]["masters"]
-                    else:
-                        assignation_options = self.all_witnesses[self.assignations[i]["role"]][which_assignation]
-                    assignation_options = [item[1] for item in assignation_options]
-                    self.widgets["option0_" + self.assignations[i]["key"]].configure(values=assignation_options)
-                    self.widgets["option1_" + self.assignations[i]["key"]].configure(values=assignation_options)
-                    pass
+            if (value["school"] == True):
+                which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
+                assignation_options = None
+                if which_assignation == "masters":
+                    assignation_options = self.all_witnesses["ministerials"]["masters"]
                 else:
-                    assignation_options = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
-                    assignation_options = [item[1] for item in assignation_options]
-                    self.widgets["option_" + self.assignations[i]["key"]].configure(values=assignation_options)
+                    assignation_options = self.all_witnesses[self.assignations[i]["role"]][which_assignation]
+                assignation_options = [item[1] for item in assignation_options]
+                self.widgets["option0_" + self.assignations[i]["key"]].configure(values=assignation_options)
+                self.widgets["option1_" + self.assignations[i]["key"]].configure(values=assignation_options)
+                pass
+            else:
+                assignation_options = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
+                assignation_options = [item[1] for item in assignation_options]
+                self.widgets["option_" + self.assignations[i]["key"]].configure(values=assignation_options)
 
 
     def generate_replacements(self):
@@ -133,6 +134,7 @@ class ReplacementsFrame(ctk.CTkFrame):
                 return witness
         return None
     
+
     def choose_companion(self, gender, possible_companion, witnesses_used):
         posible_companions = None
         if gender == "Mujer":
@@ -145,6 +147,7 @@ class ReplacementsFrame(ctk.CTkFrame):
                 return witness
         return None
     
+
     def clear_widgets(self):
         self.generate_options()
         for i, value in enumerate(self.assignations):

@@ -92,48 +92,34 @@ class DataBase:
             "ministerials": {"treasures": [],"pearls": [], "book": [], "random_1": [], "random_2": [], "masters": []},
             "elders": {"presidency": [], "needs": []}
         }
+        queries = [
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation DESC, read_bible ASC", "role": "studients", "assignation": "read_bible"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "gender = 'Mujer' DESC, last_assignation DESC, first ASC", "role": "studients", "assignation": "first"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "gender = 'Mujer' DESC, last_assignation DESC, revisit ASC", "role": "studients", "assignation": "revisit"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "gender = 'Mujer' DESC, last_assignation DESC, course ASC", "role": "studients", "assignation": "course"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "last_assignation DESC, explain ASC", "role": "studients", "assignation": "explain"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation ASC, companion_male ASC", "role": "studients", "assignation": "companion_male"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Mujer' AND exclude = 0", "order": "last_assignation ASC, companion_female ASC", "role": "studients", "assignation": "companion_female"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation DESC, speech ASC", "role": "studients", "assignation": "speech"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, masters ASC", "role": "ministerials", "assignation": "masters"},
+            {"where": "(role = 'Estudiante +' OR role = 'Ministerial') AND exclude = 0", "order": "last_assignation DESC, read_book ASC", "role": "studients_plus", "assignation": "read_book"},
+            {"where": "(role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, initial_pray ASC", "role": "studients_plus", "assignation": "initial_pray"},
+            {"where": "(role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, ending_pray ASC", "role": "studients_plus", "assignation": "ending_pray"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, treasures ASC", "role": "ministerials", "assignation": "treasures"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, pearls ASC", "role": "ministerials", "assignation": "pearls"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, book ASC", "role": "ministerials", "assignation": "book"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, random_1 ASC", "role": "ministerials", "assignation": "random_1"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, random_2 ASC", "role": "ministerials", "assignation": "random_2"},
+            {"where": "role = 'Anciano' AND exclude = 0", "order": "last_assignation DESC, presidency ASC", "role": "elders", "assignation": "presidency"},
+            {"where": "role = 'Anciano' AND exclude = 0", "order": "last_assignation DESC, needs ASC", "role": "elders", "assignation": "needs"},
+            
 
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation DESC, read_bible ASC")
-        witnesses["studients"]["read_bible"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, first ASC")
-        witnesses["studients"]["first"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, revisit ASC")
-        witnesses["studients"]["revisit"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY gender = 'Mujer' DESC, last_assignation DESC, course ASC")
-        witnesses["studients"]["course"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Estudiante' OR role = 'Estudiante +' AND companion_only = 0 AND exclude = 0 ORDER BY last_assignation DESC, explain ASC")
-        witnesses["studients"]["explain"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation DESC, speech ASC")
-        witnesses["studients"]["speech"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0 ORDER BY last_assignation ASC, companion_male ASC")
-        witnesses["studients"]["companion_male"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Mujer' AND exclude = 0 ORDER BY last_assignation ASC, companion_female ASC")
-        witnesses["studients"]["companion_female"] = cur.fetchall()
+        ]
 
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial') AND exclude = 0 ORDER BY last_assignation DESC, read_book ASC")
-        witnesses["studients_plus"]["read_book"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, initial_pray ASC")
-        witnesses["studients_plus"]["initial_pray"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, ending_pray ASC")
-        witnesses["studients_plus"]["ending_pray"] = cur.fetchall()
 
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, treasures ASC")
-        witnesses["ministerials"]["treasures"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, pearls ASC")
-        witnesses["ministerials"]["pearls"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, book ASC")
-        witnesses["ministerials"]["book"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, random_1 ASC")
-        witnesses["ministerials"]["random_1"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, random_2 ASC")
-        witnesses["ministerials"]["random_2"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE (role = 'Ministerial' or role = 'Anciano') AND exclude = 0 ORDER BY last_assignation DESC, masters ASC")
-        witnesses["ministerials"]["masters"] = cur.fetchall()
-
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY last_assignation DESC, presidency ASC")
-        witnesses["elders"]["presidency"] = cur.fetchall()
-        cur.execute("SELECT * FROM Witnesses WHERE role = 'Anciano' AND exclude = 0 ORDER BY last_assignation DESC, needs ASC")
-        witnesses["elders"]["needs"] = cur.fetchall()
+        for query in queries:
+            cur.execute("SELECT * FROM Witnesses WHERE " + query["where"] + " ORDER BY " + query["order"])
+            witnesses[query["role"]][query["assignation"]] = cur.fetchall()
 
         cur.close()
         return witnesses
