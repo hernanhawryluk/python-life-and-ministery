@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from database import DataBase
 from utils_weeks import calculate_weeks
+from utils_switchers import school_switcher, meeting_switcher
 
 class MeetingsFrame(ctk.CTkFrame):
     def __init__(self, master):
@@ -90,23 +91,14 @@ class MeetingsFrame(ctk.CTkFrame):
             self.secondary_button.configure(text="Saltar Semana")
             self.save_week()
 
-    def school_switcher(self, name):
-        switcher = {
-            "Empiece conversaciones": "first",
-            "Haga revisitas": "revisit",
-            "Haga discípulos": "course",
-            "Explique sus creencias": "explain",
-            "Discurso estudiantil": "speech",
-            "Análisis con el auditorio": "masters",
-        }
-        return switcher[name]
+    
 
     def generate_options(self):
         self.all_witnesses = self.db.read_all_data()
         for i, value in enumerate(self.assignations):
             if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
                 if (value["school"] == True):
-                    which_assignation = self.school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
+                    which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
                     assignation_options = None
                     if which_assignation == "masters":
                         assignation_options = self.all_witnesses["ministerials"]["masters"]
@@ -129,7 +121,7 @@ class MeetingsFrame(ctk.CTkFrame):
             if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
                 if (value["school"] == True):
                     if self.widgets["option0_" + self.assignations[i]["key"]].get() == "":
-                        which_assignation = self.school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
+                        which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
                         posible_participants = None
                         if which_assignation == "masters":
                             posible_participants = self.all_witnesses["ministerials"]["masters"]
@@ -221,34 +213,21 @@ class MeetingsFrame(ctk.CTkFrame):
                 checkbox = self.widgets["checkbox_" + self.assignations[i]["key"]].get()
                 if checkbox:
                     assignation = self.widgets["option_type_" + self.assignations[i]["key"]].get()
-                    assignation = self.school_switcher(assignation)
+                    assignation = school_switcher(assignation)
                     assigned = self.widgets["option0_" + self.assignations[i]["key"]].get()
                     assistant = self.widgets["option1_" + self.assignations[i]["key"]].get()
                     data_dict.append([assignation, assigned, assistant])
                     
             else:
                 assignation = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
-                assignation = self.meeting_switcher(assignation)
+                assignation = meeting_switcher(assignation)
                 assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
                 data_dict.append([assignation, assigned])
 
         self.db.write_data(data_dict)
         self.skip_week()
             
-    def meeting_switcher(self, assignation):
-        switcher = {
-            "Presidencia": "presidency",
-            "Oración inicial": "initial_pray",
-            "Tesoros de la Biblia": "treasures",
-            "Busquemos Perlas Escondidas": "pearls",
-            "Lectura de la Biblia": "read_bible",
-            "Asignación 1": "random_1",
-            "Asignación 2": "random_2",
-            "Estudio Biblico de Congregación": "book",
-            "Lectura en Estudio Biblico": "read_book",
-            "Oración final": "ending_pray",
-        }
-        return switcher[assignation]
+    
 
     def write_to_file(self, text):
         with open('reuniones.txt', 'a') as archivo:
