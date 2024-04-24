@@ -2,7 +2,7 @@ import customtkinter as ctk
 from src.gui.meetings import MeetingsFrame
 from src.gui.replacements import ReplacementsFrame
 from src.gui.participants import ParticipantsFrame
-from src.gui.configurations import ConfigurationsFrame
+from src.gui.notifications import NotificationsFrame
 
 class App(ctk.CTk):
     def __init__(self):
@@ -35,7 +35,7 @@ class TabView(ctk.CTkTabview):
         self.meetings_frame = MeetingsFrame(master=self.tab("Reuniones"))
         self.replacements_frame = ReplacementsFrame(master=self.tab("Remplazos"))
         self.participants_frame = ParticipantsFrame(master=self.tab("Participantes"))
-        self.configurations_frame = ConfigurationsFrame(master=self.tab("Notificaciones"))
+        self.configurations_frame = NotificationsFrame(master=self.tab("Notificaciones"))
 
 
 

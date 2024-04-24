@@ -73,7 +73,7 @@ class ReplacementsFrame(ctk.CTkFrame):
                 
 
     def generate_options(self):
-        self.all_witnesses = self.db.read_all_data(replacements = True)
+        self.all_witnesses = self.db.read_data_for_assignations(replacements = True)
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
                 which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())

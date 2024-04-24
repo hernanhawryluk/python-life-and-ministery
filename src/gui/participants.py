@@ -7,7 +7,7 @@ class ParticipantsFrame(ctk.CTkFrame):
 
         self.db = DataBase()
         self.to_modify = None
-        self.all_data = self.db.read_all_names()
+        self.all_data = self.db.read_all_participants_names()
         self.all_witnesses = [f"{data[0]}" for data in self.all_data]
         
         self.entry_name = ctk.CTkEntry(master=master, placeholder_text="Nombre y apellido", width=205, height=40)
@@ -56,9 +56,9 @@ class ParticipantsFrame(ctk.CTkFrame):
             return
 
         if self.to_modify is None:
-            self.db.create_new(values)
+            self.db.create_new_participant(values)
         else:
-            self.db.modify_one(self.to_modify, values)
+            self.db.modify_participant(self.to_modify, values)
             self.to_modify = None
 
         self.all_witnesses.append(values[0])
@@ -77,7 +77,7 @@ class ParticipantsFrame(ctk.CTkFrame):
 
     def modify_data(self):
         name = self.option_modify.get()
-        witness = self.db.read_one(name)[0]
+        witness = self.db.read_participant(name)[0]
         self.clear_data()
         self.entry_name.insert(0, witness[1])
         self.entry_phone.insert(0, witness[2])
@@ -92,7 +92,7 @@ class ParticipantsFrame(ctk.CTkFrame):
 
     def delete_data(self):
         name = self.option_modify.get()
-        self.db.delete_one(name)
+        self.db.delete_participant(name)
         self.all_witnesses.remove(name)
         if self.all_witnesses == []: 
             self.option_modify.set("Participantes")

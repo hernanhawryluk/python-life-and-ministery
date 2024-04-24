@@ -9,11 +9,7 @@ def calculate_weeks(additional_month = 0):
         current_month = 1 + (current_month + additional_month) % 12
     else:
         current_month = now.month + additional_month
-    months_in_spansh = [
-        "enero", "febrero", "marzo", "abril", "mayo", "junio",
-        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-    ]
-
+    
     if current_month == 12:
         next_year = current_year + 1
         next_month = 1
@@ -41,16 +37,23 @@ def calculate_weeks(additional_month = 0):
     last_monday_of_the_month = last_week[0]
     weeks[-1] = (last_monday_of_the_month, last_monday_of_the_month + datetime.timedelta(days=6))
     
-    formatted_weeks = []
-    for week in weeks:
-        current_month = months_in_spansh[week[0].month - 1]
-        if week[0].month == week[1].month:
-            formatted_weeks.append(f"Semana del {week[0].day} - {week[1].day} de {current_month.capitalize()}")
+    return weeks
+
+def format_week(week):
+    formatted_weeks = ""
+    months_in_spansh = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ]
+
+    current_month = months_in_spansh[week[0].month - 1]
+    if week[0].month == week[1].month:
+        formatted_week = f"Semana del {week[0].day} - {week[1].day} de {current_month.capitalize()}"
+    else:
+        if (week[0].month >= 12):
+            next_month = months_in_spansh[0]
         else:
-            if (week[0].month >= 12):
-                next_month = months_in_spansh[0]
-            else:
-                next_month = months_in_spansh[week[0].month]
-            formatted_weeks.append(f"Semana del {week[0].day} de {current_month.capitalize()} al {week[1].day} de {next_month.capitalize()}")
-    
-    return formatted_weeks
+            next_month = months_in_spansh[week[0].month]
+        formatted_week = f"Semana del {week[0].day} de {current_month.capitalize()} al {week[1].day} de {next_month.capitalize()}"
+
+    return formatted_week

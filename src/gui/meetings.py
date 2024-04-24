@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from os import path
 from src.database import DataBase
-from src.utils.weeks import calculate_weeks
+from src.utils.weeks import calculate_weeks, format_week
 from src.utils.switchers import school_switcher, meeting_switcher
 
 class MeetingsFrame(ctk.CTkFrame):
@@ -9,7 +9,7 @@ class MeetingsFrame(ctk.CTkFrame):
         super().__init__(master)
         self.widgets = {}
         self.generated_months = 0
-        self.weeks = calculate_weeks(self.generated_months)
+        self.weeks = calculate_weeks()
         self.db = DataBase()
         self.witnesses_excluded = []
         self.assignations = [
@@ -54,9 +54,9 @@ class MeetingsFrame(ctk.CTkFrame):
                 self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, columnspan=2, padx=10, pady=10)
                 self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
 
-        self.secondary_button = ctk.CTkButton(master=master, text="Saltar Semana", width=300, height=40, command=self.secondary_button_action)
-        self.label_week = ctk.CTkLabel(master=master, text=self.weeks[0], width=270, height=40)
-        self.main_button = ctk.CTkButton(master=master, text="Generar Semana", width=270, height=40, command=self.main_button_action)
+        self.secondary_button = ctk.CTkButton(master=master, text="Saltar", width=300, height=40, command=self.secondary_button_action)
+        self.label_week = ctk.CTkLabel(master=master, text=format_week(self.weeks[0]), width=270, height=40)
+        self.main_button = ctk.CTkButton(master=master, text="Generar", width=270, height=40, command=self.main_button_action)
 
         self.secondary_button.grid(row=15, column=0, padx=10, pady=(20, 10),columnspan=2)
         self.label_week.grid(row=15, column=2, padx=10, pady=(20, 10))
@@ -81,28 +81,28 @@ class MeetingsFrame(ctk.CTkFrame):
 
 
     def secondary_button_action(self):
-        if self.secondary_button.cget("text") == "Saltar Semana":
-            self.main_button.configure(text="Generar Semana")
+        if self.secondary_button.cget("text") == "Saltar":
+            self.main_button.configure(text="Generar")
             self.skip_week()
         elif (self.secondary_button.cget("text") == "Cancelar"):
-            self.main_button.configure(text="Generar Semana")
-            self.secondary_button.configure(text="Saltar Semana")
+            self.main_button.configure(text="Generar")
+            self.secondary_button.configure(text="Saltar")
             self.clear_widgets()
 
 
     def main_button_action(self):
-        if self.main_button.cget("text") == "Generar Semana":
-            self.main_button.configure(text="Guardar Semana")
+        if self.main_button.cget("text") == "Generar":
+            self.main_button.configure(text="Guardar")
             self.secondary_button.configure(text="Cancelar")
             self.generate_week()
         else:
-            self.main_button.configure(text="Generar Semana")
-            self.secondary_button.configure(text="Saltar Semana")
+            self.main_button.configure(text="Generar")
+            self.secondary_button.configure(text="Saltar")
             self.save_week()
 
 
     def generate_options(self):
-        self.all_witnesses = self.db.read_all_data()
+        self.all_witnesses = self.db.read_data_for_assignations()
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
                 which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
@@ -181,7 +181,7 @@ class MeetingsFrame(ctk.CTkFrame):
         if self.weeks == []:
             self.generated_months += 1
             self.weeks = calculate_weeks(self.generated_months)
-        self.label_week.configure(text=self.weeks[0])
+        self.label_week.configure(text=format_week(self.weeks[0]))
         self.witnesses_excluded = []
         self.clear_widgets()
 
@@ -205,8 +205,7 @@ class MeetingsFrame(ctk.CTkFrame):
 
     def save_week(self):
         self.write_to_file("--------------------------------------------")
-        self.write_to_file(self.label_week.cget("text"))
-        self.write_to_file("--------------------------------------------\n")
+        self.write_to_file(str(self.label_week.cget("text")))
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
                 checkbox = self.widgets["checkbox_" + self.assignations[i]["key"]].get()
@@ -219,7 +218,7 @@ class MeetingsFrame(ctk.CTkFrame):
                 assignation = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
                 assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
                 self.write_to_file(assignation + ": " + assigned)
-        self.write_to_file("\n\n")
+        self.write_to_file("notificated:False")
 
         data_dict = []
         for i, value in enumerate(self.assignations):
@@ -243,7 +242,7 @@ class MeetingsFrame(ctk.CTkFrame):
             
 
     def write_to_file(self, text):
-        file = path.join("data", "reuniones.txt")
+        file = path.join("data", "meetings.log")
         with open(file, 'a') as archivo:
             archivo.write(text + "\n")
 

@@ -44,7 +44,7 @@ class DataBase:
                 )""")
         c.close()
 
-    def create_new(self, values):
+    def create_new_participant(self, values):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         query = "INSERT INTO Witnesses (name, phone, gender, role, exclude, custom, companion_only, replacements) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -52,7 +52,7 @@ class DataBase:
         con.commit()
         cur.close()
 
-    def read_all_names(self):
+    def read_all_participants_names(self):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         cur.execute("SELECT name FROM Witnesses")
@@ -60,7 +60,7 @@ class DataBase:
         cur.close()
         return rows
     
-    def read_one(self, name):
+    def read_participant(self, name):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         cur.execute("SELECT * FROM Witnesses WHERE name = ?", (name,))
@@ -68,7 +68,7 @@ class DataBase:
         cur.close()
         return rows
     
-    def modify_one(self, id, new_data):
+    def modify_participant(self, id, new_data):
         new_data.append(id)
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
@@ -77,14 +77,14 @@ class DataBase:
         con.commit()
         cur.close()
 
-    def delete_one(self, name):
+    def delete_participant(self, name):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         cur.execute("DELETE FROM Witnesses WHERE name = ?", (name,))
         con.commit()
         cur.close()
 
-    def read_all_data(self, replacements = False):
+    def read_data_for_assignations(self, replacements = False):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         witnesses = {
