@@ -21,7 +21,7 @@ class App(ctk.CTk):
         elif self.tab_view.get() == "Participantes":
             self.geometry("950x300")
         elif self.tab_view.get() == "Notificaciones":
-            self.geometry("950x866")
+            self.geometry("1016x550")
 
 class TabView(ctk.CTkTabview):
     def __init__(self, master, **kwargs):

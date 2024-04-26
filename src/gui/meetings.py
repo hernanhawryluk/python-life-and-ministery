@@ -204,7 +204,8 @@ class MeetingsFrame(ctk.CTkFrame):
                     self.widgets["checkbox_" + self.assignations[i]["key"]].deselect()
 
     def save_week(self):
-        self.write_to_file("--------------------------------------------")
+        self.write_to_file("-------------------------------")
+        self.write_to_file("Notificated: False")
         self.write_to_file(str(self.label_week.cget("text")))
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
@@ -218,7 +219,6 @@ class MeetingsFrame(ctk.CTkFrame):
                 assignation = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
                 assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
                 self.write_to_file(assignation + ": " + assigned)
-        self.write_to_file("notificated:False")
 
         data_dict = []
         for i, value in enumerate(self.assignations):
@@ -242,9 +242,9 @@ class MeetingsFrame(ctk.CTkFrame):
             
 
     def write_to_file(self, text):
-        file = path.join("data", "meetings.log")
-        with open(file, 'a') as archivo:
-            archivo.write(text + "\n")
+        file_path = path.join("data", "meetings.log")
+        with open(file_path, 'a') as file:
+            file.write(text + "\n")
 
 
         

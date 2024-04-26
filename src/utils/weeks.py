@@ -40,7 +40,7 @@ def calculate_weeks(additional_month = 0):
     return weeks
 
 def format_week(week):
-    formatted_weeks = ""
+    formatted_week = ""
     months_in_spansh = [
         "enero", "febrero", "marzo", "abril", "mayo", "junio",
         "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
