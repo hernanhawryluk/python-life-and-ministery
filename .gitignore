@@ -6,3 +6,6 @@ witnesses.db
 
 # outputs
 meetings.log
+
+# env
+env
