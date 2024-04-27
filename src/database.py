@@ -145,3 +145,15 @@ class DataBase:
             con.commit()
             cur.close()
 
+    def get_phone_number(self, name):
+        con = sqlite3.connect(self.table_name)
+        cur = con.cursor()
+        cur.execute(f"SELECT phone FROM Witnesses WHERE name = '{name}'")
+        rows = cur.fetchall()
+        cur.close()
+
+        if rows:
+            phone_number = rows[0][0]
+            return phone_number
+        else:
+            return None
