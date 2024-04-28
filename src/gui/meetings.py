@@ -122,8 +122,6 @@ class MeetingsFrame(ctk.CTkFrame):
 
 
     def generate_week(self):
-        self.generate_options()
-        witnesses_used = []
         for i, value in enumerate(self.assignations):
             if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
                 if (value["school"] == True):
@@ -134,45 +132,47 @@ class MeetingsFrame(ctk.CTkFrame):
                             posible_participants = self.all_witnesses["ministerials"]["masters"]
                         else:
                             posible_participants = self.all_witnesses[self.assignations[i]["role"]][which_assignation]
-                        choosen_witnesses = self.choose_participant(posible_participants, witnesses_used)
+                        choosen_witness = self.choose_participant(posible_participants)
                         choosen_companion = None
                         if which_assignation in ["first", "revisit", "course", "explain"]:
-                            gender = choosen_witnesses[3]
+                            gender = choosen_witness[3]
                             possible_companion = self.all_witnesses[self.assignations[i]["role"]]
-                            choosen_companion = self.choose_companion(gender, possible_companion, witnesses_used)
-
-                        if choosen_witnesses != None:
-                            self.widgets["option0_" + self.assignations[i]["key"]].set(choosen_witnesses[1])
+                            choosen_companion = self.choose_companion(gender, possible_companion)
+                        if choosen_witness != None:
+                            self.widgets["option0_" + self.assignations[i]["key"]].set(choosen_witness[1])
+                        else:
+                            self.widgets["option0_" + self.assignations[i]["key"]].set("")
                         if choosen_companion != None:
                             self.widgets["option1_" + self.assignations[i]["key"]].set(choosen_companion[1])
+                        else:
+                            self.widgets["option0_" + self.assignations[i]["key"]].set("")
 
                 else:
                     if self.widgets["option_" + self.assignations[i]["key"]].get() == "":
                         posible_participants = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
-                        choosen_witnesses = self.choose_participant(posible_participants, witnesses_used)
-
-                        if choosen_witnesses != None:
-                            self.widgets["option_" + self.assignations[i]["key"]].set(choosen_witnesses[1])
+                        choosen_witness = self.choose_participant(posible_participants)
+                        if choosen_witness != None:
+                            self.widgets["option_" + self.assignations[i]["key"]].set(choosen_witness[1])
                         else:
                             self.widgets["option_" + self.assignations[i]["key"]].set("")
                 
 
-    def choose_participant(self, posible_participants, witnesses_used):
+    def choose_participant(self, posible_participants):
         for witness in posible_participants:
-            if witness[0] not in witnesses_used and witness[1] not in self.witnesses_excluded:
-                witnesses_used.append(witness[0])
+            if witness[1] not in self.witnesses_excluded:
+                self.witnesses_excluded.append(witness[1])
                 return witness
         return None
     
-    def choose_companion(self, gender, possible_companion, witnesses_used):
+    def choose_companion(self, gender, possible_companion):
         posible_companions = None
         if gender == "Mujer":
             posible_companions = possible_companion["companion_female"]
         else:
             posible_companions = possible_companion["companion_male"]
         for witness in posible_companions:
-            if witness[0] not in witnesses_used and witness[1] not in self.witnesses_excluded:
-                witnesses_used.append(witness[0])
+            if witness[1] not in self.witnesses_excluded:
+                self.witnesses_excluded.append(witness[1])
                 return witness
         return None
 
@@ -184,9 +184,9 @@ class MeetingsFrame(ctk.CTkFrame):
         self.label_week.configure(text=format_week(self.weeks[0]))
         self.witnesses_excluded = []
         self.clear_widgets()
+        self.generate_options()
 
     def clear_widgets(self):
-        self.generate_options()
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
                 self.widgets["option_type_" + self.assignations[i]["key"]].set(self.assignations[i]["text"])
@@ -205,7 +205,6 @@ class MeetingsFrame(ctk.CTkFrame):
 
     def save_week(self):
         self.write_to_file("-------------------------------")
-        self.write_to_file("Notificated: False")
         self.write_to_file(str(self.label_week.cget("text")))
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
@@ -221,6 +220,7 @@ class MeetingsFrame(ctk.CTkFrame):
                 self.write_to_file(assignation + ": " + assigned)
 
         data_dict = []
+        week = self.weeks[0][0]
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
                 checkbox = self.widgets["checkbox_" + self.assignations[i]["key"]].get()
@@ -229,14 +229,12 @@ class MeetingsFrame(ctk.CTkFrame):
                     assignation = school_switcher(assignation)
                     assigned = self.widgets["option0_" + self.assignations[i]["key"]].get()
                     assistant = self.widgets["option1_" + self.assignations[i]["key"]].get()
-                    data_dict.append([assignation, assigned, assistant])
-                    
+                    data_dict.append([assignation, assigned, week, assistant])
             else:
                 assignation = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
                 assignation = meeting_switcher(assignation)
                 assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
-                data_dict.append([assignation, assigned])
-
+                data_dict.append([assignation, assigned, week])
         self.db.write_data(data_dict)
         self.skip_week()
             

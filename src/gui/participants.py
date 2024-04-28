@@ -21,7 +21,7 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.button_clear = ctk.CTkButton(master=master, text="Limpiar Datos", width=430, height=40, command=self.clear_data)
         self.button_save = ctk.CTkButton(master=master, text="Guardar Cambios", width=430,height=40, command=self.save_data)
         self.option_modify = ctk.CTkOptionMenu(master=master, values=self.all_witnesses, width=430, height=40)
-        if self.all_witnesses == []: 
+        if self.all_witnesses != []: 
             self.option_modify.set("Participantes")
         self.button_modify = ctk.CTkButton(master=master, text="Modificar Participante", width=205, height=40, command=self.modify_data)
         self.button_delete = ctk.CTkButton(master=master, text="Borrar Participante", width=205, height=40, command=self.delete_data)
@@ -59,6 +59,7 @@ class ParticipantsFrame(ctk.CTkFrame):
             self.db.create_new_participant(values)
         else:
             self.db.modify_participant(self.to_modify, values)
+            self.all_witnesses.remove(values[0])
             self.to_modify = None
 
         self.all_witnesses.append(values[0])
@@ -76,27 +77,28 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.checkbox_allow_replacement.deselect()
 
     def modify_data(self):
-        name = self.option_modify.get()
-        witness = self.db.read_participant(name)[0]
-        self.clear_data()
-        self.entry_name.insert(0, witness[1])
-        self.entry_phone.insert(0, witness[2])
-        self.option_gender.set(witness[3])
-        self.option_role.set(witness[4])
-        if witness[5] == 1: self.checkbox_exclude.select()
-        if witness[6] == 1: self.checkbox_custom.select()
-        if witness[7] == 1: self.checkbox_companion_only.select()
-        if witness[8] == 1: self.checkbox_allow_replacement.select()
-        self.all_witnesses.remove(name)
-        self.to_modify = witness[0]
+        if self.option_modify.get() != "Participantes":
+            name = self.option_modify.get()
+            witness = self.db.read_participant(name)[0]
+            self.clear_data()
+            self.entry_name.insert(0, witness[1])
+            self.entry_phone.insert(0, witness[2])
+            self.option_gender.set(witness[3])
+            self.option_role.set(witness[4])
+            if witness[5] == 1: self.checkbox_exclude.select()
+            if witness[6] == 1: self.checkbox_custom.select()
+            if witness[7] == 1: self.checkbox_companion_only.select()
+            if witness[8] == 1: self.checkbox_allow_replacement.select()
+            self.to_modify = witness[0]
 
     def delete_data(self):
-        name = self.option_modify.get()
-        self.db.delete_participant(name)
-        self.all_witnesses.remove(name)
-        if self.all_witnesses == []: 
-            self.option_modify.set("Participantes")
-        else:
-            self.option_modify.configure(values=self.all_witnesses)
-            self.option_modify.set(self.all_witnesses[0])
+        if self.option_modify.get() != "Participantes":
+            name = self.option_modify.get()
+            self.db.delete_participant(name)
+            self.all_witnesses.remove(name)
+            if self.all_witnesses == []: 
+                self.option_modify.set("Participantes")
+            else:
+                self.option_modify.configure(values=self.all_witnesses)
+                self.option_modify.set(self.all_witnesses[0])
 

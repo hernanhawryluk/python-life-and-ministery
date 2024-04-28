@@ -94,25 +94,25 @@ class DataBase:
             "elders": {"presidency": [], "needs": []}
         }
         queries = [
-            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation DESC, read_bible ASC", "role": "studients", "assignation": "read_bible"},
-            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "gender = 'Mujer' DESC, last_assignation DESC, first ASC", "role": "studients", "assignation": "first"},
-            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "gender = 'Mujer' DESC, last_assignation DESC, revisit ASC", "role": "studients", "assignation": "revisit"},
-            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0 AND custom = 0", "order": "gender = 'Mujer' DESC, last_assignation DESC, course ASC", "role": "studients", "assignation": "course"},
-            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0 AND custom = 0", "order": "last_assignation DESC, explain ASC", "role": "studients", "assignation": "explain"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation ASC, read_bible ASC", "role": "studients", "assignation": "read_bible"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "last_assignation ASC, gender = 'Mujer' ASC, first ASC", "role": "studients", "assignation": "first"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0", "order": "last_assignation ASC, gender = 'Mujer' ASC, revisit ASC", "role": "studients", "assignation": "revisit"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0 AND custom = 0", "order": "last_assignation ASC, gender = 'Mujer' ASC, course ASC", "role": "studients", "assignation": "course"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND companion_only = 0 AND exclude = 0 AND custom = 0", "order": "last_assignation ASC, explain ASC", "role": "studients", "assignation": "explain"},
             {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation ASC, companion_male ASC", "role": "studients", "assignation": "companion_male"},
             {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Mujer' AND exclude = 0", "order": "last_assignation ASC, companion_female ASC", "role": "studients", "assignation": "companion_female"},
-            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation DESC, speech ASC", "role": "studients", "assignation": "speech"},
-            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, masters ASC", "role": "ministerials", "assignation": "masters"},
-            {"where": "(role = 'Estudiante +' OR role = 'Ministerial') AND exclude = 0", "order": "last_assignation DESC, read_book ASC", "role": "studients_plus", "assignation": "read_book"},
-            {"where": "(role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, initial_pray ASC", "role": "studients_plus", "assignation": "initial_pray"},
-            {"where": "(role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, ending_pray ASC", "role": "studients_plus", "assignation": "ending_pray"},
-            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, treasures ASC", "role": "ministerials", "assignation": "treasures"},
-            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, pearls ASC", "role": "ministerials", "assignation": "pearls"},
-            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, book ASC", "role": "ministerials", "assignation": "book"},
-            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, random_1 ASC", "role": "ministerials", "assignation": "random_1"},
-            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation DESC, random_2 ASC", "role": "ministerials", "assignation": "random_2"},
-            {"where": "role = 'Anciano' AND exclude = 0 AND custom = 0", "order": "last_assignation DESC, presidency ASC", "role": "elders", "assignation": "presidency"},
-            {"where": "role = 'Anciano' AND exclude = 0", "order": "last_assignation DESC, needs ASC", "role": "elders", "assignation": "needs"},
+            {"where": "(role = 'Estudiante' OR role = 'Estudiante +') AND gender = 'Hombre' AND exclude = 0", "order": "last_assignation ASC, speech ASC", "role": "studients", "assignation": "speech"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, masters ASC", "role": "ministerials", "assignation": "masters"},
+            {"where": "(role = 'Estudiante +' OR role = 'Ministerial') AND exclude = 0", "order": "last_assignation ASC, read_book ASC", "role": "studients_plus", "assignation": "read_book"},
+            {"where": "(role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, initial_pray ASC", "role": "studients_plus", "assignation": "initial_pray"},
+            {"where": "(role = 'Estudiante +' OR role = 'Ministerial' OR role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, ending_pray ASC", "role": "studients_plus", "assignation": "ending_pray"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, treasures ASC", "role": "ministerials", "assignation": "treasures"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, pearls ASC", "role": "ministerials", "assignation": "pearls"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, book ASC", "role": "ministerials", "assignation": "book"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, random_1 ASC", "role": "ministerials", "assignation": "random_1"},
+            {"where": "(role = 'Ministerial' or role = 'Anciano') AND exclude = 0", "order": "last_assignation ASC, random_2 ASC", "role": "ministerials", "assignation": "random_2"},
+            {"where": "role = 'Anciano' AND exclude = 0 AND custom = 0", "order": "last_assignation ASC, presidency ASC", "role": "elders", "assignation": "presidency"},
+            {"where": "role = 'Anciano' AND exclude = 0", "order": "last_assignation ASC, needs ASC", "role": "elders", "assignation": "needs"},
         ]
 
         try:
@@ -131,17 +131,18 @@ class DataBase:
         return witnesses
     
     def write_data(self, data_dict):
-        today = datetime.datetime.now().strftime('%Y-%m-%d')
-
         for data in data_dict:
-            print(data)
             con = sqlite3.connect(self.table_name)
             cur = con.cursor()
-            if len(data) == 3:
-                cur.execute(f"UPDATE Witnesses SET '{data[0]}' = '{today}' WHERE name = '{data[1]}'")
-                cur.execute(f"UPDATE Witnesses SET companion_male = '{today}', companion_female = '{today}' WHERE name = '{data[2]}'")
+            assignment = data[0]
+            titular = data[1]
+            week = data[2]
+            if len(data) == 4:
+                companion = data[3]
+                cur.execute(f"UPDATE Witnesses SET '{assignment}' = '{week}', 'last_assignation' = '{week}' WHERE name = '{titular}'")
+                cur.execute(f"UPDATE Witnesses SET companion_male = '{week}', companion_female = '{week}', 'last_assignation' = '{week}' WHERE name = '{companion}'")
             else:
-                cur.execute(f"UPDATE Witnesses SET '{data[0]}' = '{today}' WHERE name = '{data[1]}'")
+                cur.execute(f"UPDATE Witnesses SET '{assignment}' = '{week}', 'last_assignation' = '{week}' WHERE name = '{titular}'")
             con.commit()
             cur.close()
 
