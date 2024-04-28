@@ -5,6 +5,9 @@ from os import path
 import pyperclip
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 class NotificationsFrame(ctk.CTkFrame):
@@ -92,32 +95,48 @@ class NotificationsFrame(ctk.CTkFrame):
                 assignment = self.widgets["option_type_" + self.assignations[i]["key"]].get()
                 titular = self.widgets["option0_" + self.assignations[i]["key"]].get()
                 companion = self.widgets["option1_" + self.assignations[i]["key"]].get()
-                message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + titular + ".\n" + "Ayudante: " + companion + "."
+                message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular, "Ayudante: " + companion]
             else:
                 assignment = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
                 titular = self.widgets["option_" + self.assignations[i]["key"]].get()
-                message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + titular + "."
+                message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular]
             phone_number = self.db.get_phone_number(titular)
             if phone_number != None and phone_number != "":
                 messages.append({"phone_number": phone_number, "message": message, "checkbox_ref": checkbox_ref})
-        
-        print(messages)
-        # self.send_atomatized_notifications(messages)
+        self.send_atomatized_notifications(messages)
 
                 
     def send_atomatized_notifications(self, messages):
-        driver = webdriver.Chrome()
-        base_url = 'https://web.whatsapp.com'
-        driver.get(base_url)
-        time.sleep(30)
-        for message in messages:
-            same_tab = (base_url + "/send?phone=+" + str(message["phone_number"]) + "&text=" + str(message["message"]))
-            driver.get(same_tab)
-            time.sleep(5)
-            content = driver.switch_to.active_element
-            content.send_keys(Keys.RETURN)
-            time.sleep(2)
-            self.widgets[message["checkbox_ref"]].select()
+        try:
+            driver = webdriver.Chrome()
+            base_url = 'https://web.whatsapp.com'
+            driver.get(base_url)
+            # WebDriverWait(driver, 60).until(EC.title_contains("WhatsApp"))
+            time.sleep(30)
+            for message in messages:
+                search_box = WebDriverWait(driver, 60).until(EC.visibility_of_all_elements_located((By.CLASS_NAME, "selectable-text")))
+                search_box[0].click()
+                time.sleep(1)
+                search_box[0].send_keys(message["phone_number"])
+                time.sleep(1)
+                search_box[0].send_keys(Keys.RETURN)
+                time.sleep(2)
+                input_box = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, '//*[@title="Type a message"]')))
+                input_box.click()
+                time.sleep(2)
+                for line in message["message"]:
+                    input_box.send_keys(line)
+                    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+                time.sleep(2)
+                input_box.send_keys(Keys.ENTER)
+                time.sleep(2)
+
+                # mark the checkbox as done
+                self.widgets[message["checkbox_ref"]].select()
+        except Exception as e:
+            print(e)
+        finally:
+            driver.quit()
 
 
     def on_click_school_checkbox(self, key):
