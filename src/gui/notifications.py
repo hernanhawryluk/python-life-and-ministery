@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from src.database import DataBase
-from src.utils.switchers import meeting_switcher
+from src.utils.switchers import meeting_switcher, determiner_switcher
 from os import path
 import pyperclip
 from selenium import webdriver
@@ -17,6 +17,8 @@ class NotificationsFrame(ctk.CTkFrame):
         self.select_week = ""
         self.school_counter = 0
         self.db = DataBase()
+        self.dialog_window = None
+        self.driver = None
         
         self.assignations = [
             {"key": "presidency", "text": "Presidencia", "state": "normal", "checked_box": False, "school": False, "role": "elders"},
@@ -37,16 +39,18 @@ class NotificationsFrame(ctk.CTkFrame):
             ]
         
         self.button_lead_weeks = ctk.CTkButton(master=master, text="Cargar semanas", font=("Arial", 16), width=300, height=36, command=self.on_click_load_weeks)
-        self.option_week_selector = ctk.CTkOptionMenu(master=master, width=268, height=36, anchor="center", command=self.on_click_select_week)
-        self.button_open_whatsapp = ctk.CTkButton(master=master, text="Envío Automatizado", font=("Arial", 16), width=268, height=36, command=self.on_click_automatized)
+        self.option_week_selector = ctk.CTkOptionMenu(master=master,  values=["← Cargar semanas"], width=268, height=36, anchor="center", command=self.on_click_select_week)
         self.option_week_selector.set("← Cargar semanas")
-
+        self.button_send_assignments = ctk.CTkButton(master=master, text="Conectar WhatsApp",font=("Arial", 16), width=268, height=36, command=self.on_click_automatized)
+        
         self.button_lead_weeks.grid(row=0, column=0, padx=10, pady=(20, 10), columnspan=2)
         self.option_week_selector.grid(row=0, column=2, padx=10, pady=(20, 10))
-        self.button_open_whatsapp.grid(row=0, column=3, padx=10, pady=(20, 10))
-
+        self.button_send_assignments.grid(row=0, column=3, padx=10, pady=(20, 10))
+        
         self.label_copy = ctk.CTkLabel(master=master, text=" ▼  Copia al portapapeles", font=("Arial", 18), width=305, anchor="w")
         self.label_copy.grid(row=1, column=0, padx=10, pady=(6, 10), columnspan=2)
+        self.checkbox_only_reminders = ctk.CTkCheckBox(master=master, text="Solo recordatorios",font=("Arial", 16), width=170, height=36)
+        self.checkbox_only_reminders.grid(row=1, column=3, padx=10, pady=10)
 
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
@@ -68,7 +72,14 @@ class NotificationsFrame(ctk.CTkFrame):
                 self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i + 2, column=0, columnspan=2, padx=10, pady=10)
                 self.widgets["option_" + self.assignations[i]["key"]].grid(row=i + 2, column=2, padx=10, pady=10)
 
-        
+
+    def open_dialog_window(self):
+        if self.dialog_window is None or not self.dialog_window.winfo_exists():
+            self.dialog_window = ToplevelWindow(self)
+        else:
+            self.dialog_window.focus()
+    
+
     def on_click_load_weeks(self):
         file_path = path.join("data", "meetings.log")
         if (path.exists(file_path) == True):
@@ -78,84 +89,129 @@ class NotificationsFrame(ctk.CTkFrame):
                 if line[:6] == "Semana":
                     weeks_options.append(line.replace("\n", ""))
             self.option_week_selector.configure(values=weeks_options)
+            if len(weeks_options) > 0:
+                self.option_week_selector.set("Elegir semana")
 
 
     def on_click_select_week(self, key):
+        for i, value in enumerate(self.assignations):
+                self.widgets["checkbox_" + self.assignations[i]["key"]].deselect()
         self.selected_week = key
         self.load_week()
+        if self.driver != None:
+            self.button_send_assignments.configure(text="Envío Automatizado")
 
 
     def on_click_automatized(self):
-        week = self.selected_week
-        messages = []
+        if self.driver == None:
+            try:
+                self.driver = webdriver.Chrome()
+                base_url = 'https://web.whatsapp.com'
+                self.driver.get(base_url)
+                if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+                    self.button_send_assignments.configure(text="Envío Automatizado")
+                else:
+                    self.button_send_assignments.configure(text="Desconectar WhatsApp")
+            except Exception as e:
+                print(e)
 
-        for i, value in enumerate(self.assignations):
-            checkbox_ref = "checkbox_" + self.assignations[i]["key"]
-            if (value["school"] == True):
-                assignment = self.widgets["option_type_" + self.assignations[i]["key"]].get()
-                titular = self.widgets["option0_" + self.assignations[i]["key"]].get()
-                companion = self.widgets["option1_" + self.assignations[i]["key"]].get()
-                message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular, "Ayudante: " + companion]
-            else:
-                assignment = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
-                titular = self.widgets["option_" + self.assignations[i]["key"]].get()
-                message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular]
-            phone_number = self.db.get_phone_number(titular)
-            if phone_number != None and phone_number != "":
-                messages.append({"phone_number": phone_number, "message": message, "checkbox_ref": checkbox_ref})
-        self.send_atomatized_notifications(messages)
+        elif self.driver != None and self.button_send_assignments.cget("text") == "Desconectar WhatsApp":
+            try:
+                self.driver.quit()
+                self.driver = None
+                self.button_send_assignments.configure(text="Conectar WhatsApp")
+            except Exception as e:
+                print(e)
 
-                
+        else:
+            if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+                week = self.selected_week
+                messages = []
+
+                for i, value in enumerate(self.assignations):
+                    checkbox_ref = "checkbox_" + self.assignations[i]["key"]
+                    if (value["school"] == True):
+                        assignment = self.widgets["option_type_" + self.assignations[i]["key"]].get()
+                        titular = self.widgets["option0_" + self.assignations[i]["key"]].get()
+                        companion = self.widgets["option1_" + self.assignations[i]["key"]].get()
+                        if self.checkbox_only_reminders.get() == 0:
+                            message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular, "Ayudante: " + companion]
+                        else:
+                            message = [self.reminder_message_generator(titular, assignment)]
+                    else:
+                        assignment = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
+                        titular = self.widgets["option_" + self.assignations[i]["key"]].get()
+                        if self.checkbox_only_reminders.get() == 0:
+                            message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular]
+                        else:
+                            message = [self.reminder_message_generator(titular, assignment)]
+                    phone_number = self.db.get_phone_number(titular)
+                    if phone_number != None and phone_number != "":
+                        messages.append({"phone_number": phone_number, "message": message, "checkbox_ref": checkbox_ref})
+                self.send_atomatized_notifications(messages)
+
+
+    def reminder_message_generator(self, titular, assignment):
+        name_and_surname = titular.split(" ")
+        only_name = name_and_surname[0]
+        assignment_with_determiner = determiner_switcher(assignment)
+        message = "Hola " + only_name + "! Te escribo a modo de recordatorio. En la reunión de esta semana tenés " + assignment_with_determiner + ". Nos vemos allá. ¡Saludos!"
+        return message
+
+
     def send_atomatized_notifications(self, messages):
         try:
-            driver = webdriver.Chrome()
-            base_url = 'https://web.whatsapp.com'
-            driver.get(base_url)
-            # WebDriverWait(driver, 60).until(EC.title_contains("WhatsApp"))
-            time.sleep(30)
             for message in messages:
-                search_box = WebDriverWait(driver, 60).until(EC.visibility_of_all_elements_located((By.CLASS_NAME, "selectable-text")))
+                search_box = WebDriverWait(self.driver, 60).until(EC.visibility_of_all_elements_located((By.CLASS_NAME, "selectable-text")))
                 search_box[0].click()
                 time.sleep(1)
                 search_box[0].send_keys(message["phone_number"])
                 time.sleep(1)
                 search_box[0].send_keys(Keys.RETURN)
                 time.sleep(2)
-                input_box = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, '//*[@title="Type a message"]')))
+                input_box = WebDriverWait(self.driver, 60).until(EC.presence_of_element_located((By.XPATH, '//*[@title="Type a message"]')))
                 input_box.click()
-                time.sleep(2)
+                time.sleep(1)
                 for line in message["message"]:
                     input_box.send_keys(line)
                     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-                time.sleep(2)
+                time.sleep(1)
                 input_box.send_keys(Keys.ENTER)
                 time.sleep(2)
-
-                # mark the checkbox as done
                 self.widgets[message["checkbox_ref"]].select()
+
+            self.button_send_assignments.configure(text="Desconectar WhatsApp")
         except Exception as e:
             print(e)
-        finally:
-            driver.quit()
 
 
     def on_click_school_checkbox(self, key):
-        week = self.selected_week
-        assignment = self.widgets["option_type_" + key].get()
-        name = self.widgets["option0_" + key].get()
-        companion = self.widgets["option1_" + key].get()
-
-        message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + name + ".\n" + "Ayudante: " + companion + "."
-        pyperclip.copy(message)
+        if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+            week = self.selected_week
+            assignment = self.widgets["option_type_" + key].get()
+            name = self.widgets["option0_" + key].get()
+            companion = self.widgets["option1_" + key].get()
+            message = ""
+            if self.checkbox_only_reminders.get() == 0:
+                message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + name + ".\n" + "Ayudante: " + companion + "."
+            else:
+                message = self.reminder_message_generator(name, assignment)
+            pyperclip.copy(message)
+            self.open_dialog_window()
 
     
     def on_click_checkbox(self, key):
-        week = self.selected_week
-        assignment = self.widgets["checkbox_" + key].cget("text")
-        name = self.widgets["option_" + key].get()
-
-        message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + name + "."
-        pyperclip.copy(message)
+        if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+            week = self.selected_week
+            assignment = self.widgets["checkbox_" + key].cget("text")
+            name = self.widgets["option_" + key].get()
+            message = ""
+            if self.checkbox_only_reminders.get() == 0:
+                message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + name + "."
+            else:
+                message = self.reminder_message_generator(name, assignment)
+            pyperclip.copy(message)
+            self.open_dialog_window()
 
 
     def load_week(self):
@@ -173,6 +229,7 @@ class NotificationsFrame(ctk.CTkFrame):
                     else:
                         self.fill_assignation(line.replace("\n", ""))
             self.school_counter = 0
+            file.close()
 
     
     def fill_assignation(self, line):
@@ -191,3 +248,16 @@ class NotificationsFrame(ctk.CTkFrame):
             name = name_or_names
             short_assignment = meeting_switcher(assignment)
             self.widgets["option_" + short_assignment].set(name)
+
+
+class ToplevelWindow(ctk.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.geometry(f"400x80+278+415")
+        self.title("Mensaje copiado")
+        self.label = ctk.CTkLabel(self, text="El mensaje se ha copiado al portapapeles.", font=("Arial", 18))
+        self.label.pack(padx=20, pady=20)
+
+        self.after(2000, self.destroy)
+        
