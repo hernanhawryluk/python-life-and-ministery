@@ -3,6 +3,7 @@ from src.gui.meetings import MeetingsFrame
 from src.gui.replacements import ReplacementsFrame
 from src.gui.participants import ParticipantsFrame
 from src.gui.notifications import NotificationsFrame
+from src.gui.clean import CleanFrame
 
 class App(ctk.CTk):
     def __init__(self):
@@ -22,6 +23,8 @@ class App(ctk.CTk):
             self.geometry("950x300")
         elif self.tab_view.get() == "Notificaciones":
             self.geometry("956x910")
+        elif self.tab_view.get() == "Limpiar":
+            self.geometry("956x910")
 
 class TabView(ctk.CTkTabview):
     def __init__(self, master, **kwargs):
@@ -31,11 +34,13 @@ class TabView(ctk.CTkTabview):
         self.add("Remplazos")
         self.add("Participantes")
         self.add("Notificaciones")
+        self.add("Limpiar")
 
         self.meetings_frame = MeetingsFrame(master=self.tab("Reuniones"))
         self.replacements_frame = ReplacementsFrame(master=self.tab("Remplazos"))
         self.participants_frame = ParticipantsFrame(master=self.tab("Participantes"))
         self.configurations_frame = NotificationsFrame(master=self.tab("Notificaciones"))
+        self.clean_frame = CleanFrame(master=self.tab("Limpiar"))
 
 
 

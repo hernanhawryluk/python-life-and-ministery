@@ -44,6 +44,7 @@ class DataBase:
                 )""")
         c.close()
 
+
     def create_new_participant(self, values):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
@@ -51,6 +52,7 @@ class DataBase:
         cur.execute(query, values)
         con.commit()
         cur.close()
+
 
     def read_all_participants_names(self):
         con = sqlite3.connect(self.table_name)
@@ -60,6 +62,7 @@ class DataBase:
         cur.close()
         return rows
     
+
     def read_participant(self, name):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
@@ -68,6 +71,7 @@ class DataBase:
         cur.close()
         return rows
     
+
     def modify_participant(self, id, new_data):
         new_data.append(id)
         con = sqlite3.connect(self.table_name)
@@ -77,12 +81,14 @@ class DataBase:
         con.commit()
         cur.close()
 
+
     def delete_participant(self, name):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
         cur.execute("DELETE FROM Witnesses WHERE name = ?", (name,))
         con.commit()
         cur.close()
+
 
     def read_data_for_assignations(self, replacements = False):
         con = sqlite3.connect(self.table_name)
@@ -130,6 +136,7 @@ class DataBase:
         cur.close()
         return witnesses
     
+
     def write_data(self, data_dict):
         for data in data_dict:
             con = sqlite3.connect(self.table_name)
@@ -139,12 +146,13 @@ class DataBase:
             week = data[2]
             if len(data) == 4:
                 companion = data[3]
-                cur.execute(f"UPDATE Witnesses SET '{assignment}' = '{week}', 'last_assignation' = '{week}' WHERE name = '{titular}'")
+                cur.execute(f"UPDATE Witnesses SET {assignment} = '{week}', last_assignation = '{week}' WHERE name = '{titular}'")
                 cur.execute(f"UPDATE Witnesses SET companion_male = '{week}', companion_female = '{week}', 'last_assignation' = '{week}' WHERE name = '{companion}'")
             else:
-                cur.execute(f"UPDATE Witnesses SET '{assignment}' = '{week}', 'last_assignation' = '{week}' WHERE name = '{titular}'")
+                cur.execute(f"UPDATE Witnesses SET {assignment} = '{week}', last_assignation = '{week}' WHERE name = '{titular}'")
             con.commit()
             cur.close()
+
 
     def get_phone_number(self, name):
         con = sqlite3.connect(self.table_name)
@@ -158,3 +166,20 @@ class DataBase:
             return phone_number
         else:
             return None
+        
+
+    def clean(self):
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        assignation_list = ["read_bible", "first", "revisit", "course", "explain", "speech", "companion_male", "companion_female", "initial_pray", "ending_pray", "read_book","treasures","pearls", "book", "random_1", "random_2", "masters", "presidency", "needs", "last_assignation"]
+
+        con = sqlite3.connect(self.table_name)
+        cur = con.cursor()
+        for assignation in assignation_list:
+            cur.execute(f"SELECT name FROM Witnesses WHERE {assignation} > {today}")
+            person_list = cur.fetchall()
+            if person_list != []:
+                for person in person_list:
+                    name = person[0]
+                    cur.execute(f"UPDATE Witnesses SET {assignation} = NULL WHERE name = '{name}'")
+        con.commit()
+        cur.close()
