@@ -24,7 +24,7 @@ class App(ctk.CTk):
         elif self.tab_view.get() == "Notificaciones":
             self.geometry("956x910")
         elif self.tab_view.get() == "Limpiar":
-            self.geometry("956x910")
+            self.geometry("504x360")
 
 class TabView(ctk.CTkTabview):
     def __init__(self, master, **kwargs):
