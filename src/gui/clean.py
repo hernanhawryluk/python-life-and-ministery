@@ -25,24 +25,31 @@ class CleanFrame(ctk.CTkFrame):
     def clean_db(self):
         self.db.clean()
 
+
     def clear_logs(self):
+        content_to_save = ["-------------------------------\n"]
+        delete_between = False
+        to_keep = False
         erase_until = self.option_clear_logs.get()
         if erase_until != "Elegir hasta que registro se debe limpiar":
             file_path = path.join("data", "meetings.log")
             if (path.exists(file_path) == True):
-                file = open(file_path, 'r+')
+                file = open(file_path, 'r')
                 lines = file.readlines()
-                for i, line in enumerate(lines):
+                for line in lines:
                     if line.replace("\n", "") == erase_until:
-                        break
-                    else:
-                        file.seek(0)
-                        file.writelines(lines[i:])        
+                        delete_between = True
+                    elif delete_between == True and line == "-------------------------------\n" and to_keep == False:
+                        to_keep = True
+                    elif to_keep == True:
+                        content_to_save.append(line)
                 file.close()
+                write_file = open(file_path, "w")
+                write_file.writelines(content_to_save)        
+                write_file.close()
                 print("success!")
         self.load_weeks()
                 
-
 
     def load_weeks(self):
         file_path = path.join("data", "meetings.log")
