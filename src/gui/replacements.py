@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from src.database import DataBase
 from src.utils.switchers import school_switcher
+import datetime
 
 class ReplacementsFrame(ctk.CTkFrame):
     def __init__(self, master):
@@ -29,31 +30,27 @@ class ReplacementsFrame(ctk.CTkFrame):
 
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
-                self.widgets["checkbox_" + self.assignations[i]["key"]] = ctk.CTkCheckBox(master=master, text="", font=("Arial", 16), width=0, state=value["state"], text_color_disabled="#FFFFFF")
                 self.widgets["option_type_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias" , "Discurso estudiantil", "Análisis con el auditorio"], command=self.option_choose_assignation, width=250)
                 self.widgets["option_type_" + self.assignations[i]["key"]].set(value["default"])
                 self.widgets["option0_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
                 self.widgets["option1_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
 
-                self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, padx=10, pady=10)
-                self.widgets["option_type_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10, sticky="nsew")
-                self.widgets["option0_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
-                self.widgets["option1_" + self.assignations[i]["key"]].grid(row=i, column=3, padx=10, pady=10)
+                self.widgets["option_type_" + self.assignations[i]["key"]].grid(row=i, column=0, padx=10, pady=10, sticky="nsew")
+                self.widgets["option0_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10)
+                self.widgets["option1_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
 
             else:
-                self.widgets["checkbox_" + self.assignations[i]["key"]] = ctk.CTkCheckBox(master=master, text=value["text"], font=("Arial", 16), state=value["state"], width=300, text_color_disabled="#FFFFFF")
+                self.widgets["label_" + self.assignations[i]["key"]] = ctk.CTkLabel(master=master, text=value["text"], font=("Arial", 16), width=300, anchor="w")
                 self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
 
-                self.widgets["checkbox_" + self.assignations[i]["key"]].grid(row=i, column=0, columnspan=2, padx=10, pady=10)
-                self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=2, padx=10, pady=10)
+                self.widgets["label_" + self.assignations[i]["key"]].grid(row=i, column=0, padx=10, pady=10)
+                self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10)
 
         self.button_secondary = ctk.CTkButton(master=master, text="Limpiar", width=270, height=40, command=self.clear_widgets)
-        self.button_tertiary = ctk.CTkButton(master=master, text="Notificar", width=270, height=40)
-        self.button_main = ctk.CTkButton(master=master, text="Generar", width=270, height=40, command=self.generate_replacements)
+        self.button_main = ctk.CTkButton(master=master, text="Guardar", width=270, height=40, command=self.save_dates)
 
-        self.button_secondary.grid(row=15, column=0, padx=10, pady=(20, 10), sticky="nsew", columnspan=2)
-        self.button_tertiary.grid(row=15, column=2, padx=10, pady=(20, 10), sticky="nsew", columnspan=1)
-        self.button_main.grid(row=15, column=3, padx=10, pady=(20, 10), sticky="nsew", columnspan=1)
+        self.button_secondary.grid(row=15, column=0, padx=10, pady=(20, 10), sticky="nsew")
+        self.button_main.grid(row=15, column=1, padx=10, pady=(20, 10), sticky="nsew", columnspan=2)
 
         self.option_choose_assignation(choice="tkOptionMenu")
         self.generate_options()
@@ -63,6 +60,24 @@ class ReplacementsFrame(ctk.CTkFrame):
         self.witnesses_excluded.append(choice)
 
 
+    def save_dates(self):
+        data_dict = []
+        week = datetime.date.today().strftime('%Y-%m-%d')
+        for i, value in enumerate(self.assignations):
+            if (value["school"] == True):
+                assigned = self.widgets["option0_" + self.assignations[i]["key"]].get()
+                assistant = self.widgets["option1_" + self.assignations[i]["key"]].get()
+                if assigned != "":
+                    data_dict.append(["replacements_date", assigned, week])
+                elif assistant != "":
+                    data_dict.append(["replacements_date", assistant, week])
+            else:
+                assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
+                if assigned != "":
+                    data_dict.append(["replacements_date", assigned, week])
+        self.db.write_data(data_dict)
+
+
     def option_choose_assignation(self, choice):
         for i in range(1, 5):
             option_type = self.widgets[f"option_type_school_{i}"]
@@ -70,6 +85,7 @@ class ReplacementsFrame(ctk.CTkFrame):
                 self.widgets[f"option1_school_{i}"].grid()
             else:
                 self.widgets[f"option1_school_{i}"].grid_remove()
+        self.generate_options()
                 
 
     def generate_options(self):
@@ -90,72 +106,13 @@ class ReplacementsFrame(ctk.CTkFrame):
                 assignation_options = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
                 assignation_options = [item[1] for item in assignation_options]
                 self.widgets["option_" + self.assignations[i]["key"]].configure(values=assignation_options)
-
-
-    def generate_replacements(self):
-        self.generate_options()
-        witnesses_used = []
-        for i, value in enumerate(self.assignations):
-            if (self.widgets["checkbox_" + self.assignations[i]["key"]].get() == 1):
-                if (value["school"] == True):
-                    if self.widgets["option0_" + self.assignations[i]["key"]].get() == "":
-                        which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
-                        posible_participants = None
-                        if which_assignation == "masters":
-                            posible_participants = self.all_witnesses["ministerials"]["masters"]
-                        else:
-                            posible_participants = self.all_witnesses[self.assignations[i]["role"]][which_assignation]
-                        choosen_witnesses = self.choose_participant(posible_participants, witnesses_used)
-                        choosen_companion = None
-                        if which_assignation in ["first", "revisit", "course", "explain"]:
-                            gender = choosen_witnesses[3]
-                            possible_companion = self.all_witnesses[self.assignations[i]["role"]]
-                            choosen_companion = self.choose_companion(gender, possible_companion, witnesses_used)
-
-                        if choosen_witnesses != None:
-                            self.widgets["option0_" + self.assignations[i]["key"]].set(choosen_witnesses[1])
-                        if choosen_companion != None:
-                            self.widgets["option1_" + self.assignations[i]["key"]].set(choosen_companion[1])
-
-                else:
-                    if self.widgets["option_" + self.assignations[i]["key"]].get() == "":
-                        posible_participants = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
-                        choosen_witnesses = self.choose_participant(posible_participants, witnesses_used)
-
-                        if choosen_witnesses != None:
-                            self.widgets["option_" + self.assignations[i]["key"]].set(choosen_witnesses[1])
-                        else:
-                            self.widgets["option_" + self.assignations[i]["key"]].set("")
-                
-
-    def choose_participant(self, posible_participants, witnesses_used):
-        for witness in posible_participants:
-            if witness[0] not in witnesses_used and witness[1] not in self.witnesses_excluded:
-                witnesses_used.append(witness[0])
-                return witness
-        return None
-    
-
-    def choose_companion(self, gender, possible_companion, witnesses_used):
-        posible_companions = None
-        if gender == "Mujer":
-            posible_companions = possible_companion["companion_female"]
-        else:
-            posible_companions = possible_companion["companion_male"]
-        for witness in posible_companions:
-            if witness[0] not in witnesses_used and witness[1] not in self.witnesses_excluded:
-                witnesses_used.append(witness[0])
-                return witness
-        return None
     
 
     def clear_widgets(self):
         self.generate_options()
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
-                self.widgets["checkbox_" + self.assignations[i]["key"]].deselect()
                 self.widgets["option0_" + self.assignations[i]["key"]].set("")
                 self.widgets["option1_" + self.assignations[i]["key"]].set("")
             else:
-                self.widgets["checkbox_" + self.assignations[i]["key"]].deselect()
                 self.widgets["option_" + self.assignations[i]["key"]].set("")

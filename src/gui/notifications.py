@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 
 class NotificationsFrame(ctk.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master, tabview):
         super().__init__(master)
         self.widgets = {}
         self.select_week = ""
@@ -19,6 +19,7 @@ class NotificationsFrame(ctk.CTkFrame):
         self.db = DataBase()
         self.dialog_window = None
         self.driver = None
+        self.tabview = tabview
         
         self.assignations = [
             {"key": "presidency", "text": "Presidencia", "state": "normal", "checked_box": False, "school": False, "role": "elders"},
@@ -38,19 +39,16 @@ class NotificationsFrame(ctk.CTkFrame):
             {"key": "ending_pray", "text": "Oración final", "state": "normal", "checked_box": False, "school": False, "role": "studients_plus"},
             ]
         
-        self.button_lead_weeks = ctk.CTkButton(master=master, text="Cargar semanas", font=("Arial", 16), width=300, height=36, command=self.on_click_load_weeks)
-        self.option_week_selector = ctk.CTkOptionMenu(master=master,  values=["← Cargar semanas"], width=268, height=36, anchor="center", command=self.on_click_select_week)
-        self.option_week_selector.set("← Cargar semanas")
-        self.button_send_assignments = ctk.CTkButton(master=master, text="Conectar WhatsApp",font=("Arial", 16), width=268, height=36, command=self.on_click_automatized)
+        self.option_week_selector = ctk.CTkOptionMenu(master=master,  values=["Elegir semana"], width=590, height=34, anchor="center", command=self.on_click_select_week)
+        self.button_send_assignments = ctk.CTkButton(master=master, text="Conectar WhatsApp",font=("Arial", 16), width=268, height=34, command=self.on_click_automatized)
         
-        self.button_lead_weeks.grid(row=0, column=0, padx=10, pady=(20, 10), columnspan=2)
-        self.option_week_selector.grid(row=0, column=2, padx=10, pady=(20, 10))
+        self.option_week_selector.grid(row=0, column=0, padx=10, pady=(20, 10), columnspan=3)
         self.button_send_assignments.grid(row=0, column=3, padx=10, pady=(20, 10))
         
         self.label_copy = ctk.CTkLabel(master=master, text=" ▼  Copia al portapapeles", font=("Arial", 18), width=305, anchor="w")
-        self.label_copy.grid(row=1, column=0, padx=10, pady=(6, 10), columnspan=2)
+        self.label_copy.grid(row=1, column=0, padx=10, pady=(4, 2), columnspan=2)
         self.checkbox_only_reminders = ctk.CTkCheckBox(master=master, text="Solo recordatorios",font=("Arial", 16), width=170, height=36)
-        self.checkbox_only_reminders.grid(row=1, column=3, padx=10, pady=10)
+        self.checkbox_only_reminders.grid(row=1, column=3, padx=10, pady=(4, 2))
 
         for i, value in enumerate(self.assignations):
             if (value["school"] == True):
@@ -80,7 +78,7 @@ class NotificationsFrame(ctk.CTkFrame):
             self.dialog_window.focus()
     
 
-    def on_click_load_weeks(self):
+    def load_weeks(self):
         file_path = path.join("data", "meetings.log")
         if (path.exists(file_path) == True):
             file = open(file_path, 'r')
@@ -108,7 +106,7 @@ class NotificationsFrame(ctk.CTkFrame):
                 self.driver = webdriver.Chrome()
                 base_url = 'https://web.whatsapp.com'
                 self.driver.get(base_url)
-                if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+                if self.option_week_selector.get() != "Elegir semana":
                     self.button_send_assignments.configure(text="Envío Automatizado")
                 else:
                     self.button_send_assignments.configure(text="Desconectar WhatsApp")
@@ -124,7 +122,7 @@ class NotificationsFrame(ctk.CTkFrame):
                 print(e)
 
         else:
-            if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+            if self.option_week_selector.get() != "Elegir semana":
                 week = self.selected_week
                 messages = []
 
@@ -186,7 +184,7 @@ class NotificationsFrame(ctk.CTkFrame):
 
 
     def on_click_school_checkbox(self, key):
-        if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+        if self.option_week_selector.get() != "Elegir semana":
             week = self.selected_week
             assignment = self.widgets["option_type_" + key].get()
             name = self.widgets["option0_" + key].get()
@@ -201,7 +199,7 @@ class NotificationsFrame(ctk.CTkFrame):
 
     
     def on_click_checkbox(self, key):
-        if self.option_week_selector.get() != "← Cargar semanas" and self.option_week_selector.get() != "Elegir semana":
+        if self.option_week_selector.get() != "Elegir semana":
             week = self.selected_week
             assignment = self.widgets["checkbox_" + key].cget("text")
             name = self.widgets["option_" + key].get()
@@ -254,7 +252,14 @@ class ToplevelWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.geometry(f"400x80+278+415")
+        window_width = 400
+        window_height = 70
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        position_x = (screen_width // 2) - (window_width // 2)
+        position_y = (screen_height // 2) - (window_height // 2)
+        self.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
+
         self.title("Mensaje copiado")
         self.label = ctk.CTkLabel(self, text="El mensaje se ha copiado al portapapeles.", font=("Arial", 18))
         self.label.pack(padx=20, pady=20)

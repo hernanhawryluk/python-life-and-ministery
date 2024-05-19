@@ -23,6 +23,7 @@ class App(ctk.CTk):
             self.geometry("950x300")
         elif self.tab_view.get() == "Notificaciones":
             self.geometry("956x910")
+            self.tab_view.notifications_frame.load_weeks()
         elif self.tab_view.get() == "Limpiar":
             self.geometry("504x360")
 
@@ -32,14 +33,14 @@ class TabView(ctk.CTkTabview):
 
         self.add("Reuniones")
         self.add("Remplazos")
-        self.add("Participantes")
         self.add("Notificaciones")
+        self.add("Participantes")
         self.add("Limpiar")
 
         self.meetings_frame = MeetingsFrame(master=self.tab("Reuniones"))
         self.replacements_frame = ReplacementsFrame(master=self.tab("Remplazos"))
+        self.notifications_frame = NotificationsFrame(master=self.tab("Notificaciones"), tabview=self)
         self.participants_frame = ParticipantsFrame(master=self.tab("Participantes"))
-        self.configurations_frame = NotificationsFrame(master=self.tab("Notificaciones"))
         self.clean_frame = CleanFrame(master=self.tab("Limpiar"))
 
 
