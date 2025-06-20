@@ -133,14 +133,14 @@ class NotificationsFrame(ctk.CTkFrame):
                         titular = self.widgets["option0_" + self.assignations[i]["key"]].get()
                         companion = self.widgets["option1_" + self.assignations[i]["key"]].get()
                         if self.checkbox_only_reminders.get() == 0:
-                            message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular, "Ayudante: " + companion]
+                            message = [f"¡Hola {titular.split(' ')[0]}! Espero que te encuentres bien. Te envío tu asignación para la reunión Vida y Ministerio Cristianos:", "", str(week), "Asignación: " + assignment, "Titular: " + titular, "Ayudante: " + companion]
                         else:
                             message = [self.reminder_message_generator(titular, assignment)]
                     else:
                         assignment = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
                         titular = self.widgets["option_" + self.assignations[i]["key"]].get()
                         if self.checkbox_only_reminders.get() == 0:
-                            message = ["Asignación para la reunión vida y ministerio teocrático:", str(week), "Asignación: " + assignment, "Titular: " + titular]
+                            message = [f"¡Hola {titular.split(' ')[0]}! Espero que te encuentres bien. Te envío tu asignación para la reunión Vida y Ministerio Cristianos:", "", str(week), "Asignación: " + assignment, "Titular: " + titular]
                         else:
                             message = [self.reminder_message_generator(titular, assignment)]
                     phone_number = self.db.get_phone_number(titular)
@@ -167,7 +167,7 @@ class NotificationsFrame(ctk.CTkFrame):
                 time.sleep(1)
                 search_box[0].send_keys(Keys.RETURN)
                 time.sleep(2)
-                input_box = WebDriverWait(self.driver, 60).until(EC.presence_of_element_located((By.XPATH, '//*[@title="Type a message"]')))
+                input_box = WebDriverWait(self.driver, 60).until(EC.presence_of_element_located((By.XPATH, '//div[@contenteditable="true" and @data-tab="10"]')))
                 input_box.click()
                 time.sleep(1)
                 for line in message["message"]:
