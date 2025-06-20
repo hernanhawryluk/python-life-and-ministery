@@ -13,11 +13,11 @@ class MeetingsFrame(ctk.CTkFrame):
         self.db = DataBase()
         self.witnesses_excluded = []
         self.assignations = [
-            {"key": "presidency", "text": "Presidencia", "state": "disabled", "checked_box": True, "school": False, "role": "elders"},
-            {"key": "initial_pray","text": "Oración inicial", "state": "disabled", "checked_box": True, "school": False, "role": "studients_plus"}, 
-            {"key": "treasures", "text": "Tesoros de la Biblia", "state": "disabled", "checked_box": True, "school": False, "role": "ministerials"},
-            {"key": "pearls", "text": "Busquemos Perlas Escondidas", "state": "disabled", "checked_box": True, "school": False, "role": "ministerials"},
-            {"key": "read_bible","text": "Lectura de la Biblia", "state": "disabled", "checked_box": True, "school": False, "role": "studients"},
+            {"key": "presidency", "text": "Presidencia", "state": "normal", "checked_box": True, "school": False, "role": "elders"},
+            {"key": "initial_pray","text": "Oración inicial", "state": "normal", "checked_box": True, "school": False, "role": "studients_plus"}, 
+            {"key": "treasures", "text": "Tesoros de la Biblia", "state": "normal", "checked_box": True, "school": False, "role": "ministerials"},
+            {"key": "pearls", "text": "Busquemos Perlas Escondidas", "state": "normal", "checked_box": True, "school": False, "role": "ministerials"},
+            {"key": "read_bible","text": "Lectura de la Biblia", "state": "normal", "checked_box": True, "school": False, "role": "studients"},
             {"key": "school_1", "text": "Empiece conversaciones", "state": "normal", "checked_box": True, "school": True, "role": "studients"},
             {"key": "school_2", "text": "Haga revisitas", "state": "normal", "checked_box": True, "school": True, "role": "studients"},
             {"key": "school_3", "text": "Haga discípulos", "state": "normal", "checked_box": True, "school": True, "role": "studients"},
@@ -27,7 +27,7 @@ class MeetingsFrame(ctk.CTkFrame):
             {"key": "needs", "text": "Necesidades Locales", "state": "normal", "checked_box": False, "school": False, "role": "elders"},
             {"key": "book", "text": "Estudio Biblico de Congregación", "state": "normal", "checked_box": True, "school": False, "role": "ministerials"},
             {"key": "read_book", "text": "Lectura en Estudio Biblico", "state": "normal", "checked_box": True, "school": False, "role": "studients_plus"},
-            {"key": "ending_pray", "text": "Oración final", "state": "disabled", "checked_box": True, "school": False, "role": "studients_plus"},
+            {"key": "ending_pray", "text": "Oración final", "state": "normal", "checked_box": True, "school": False, "role": "studients_plus"},
             ]
         
         for i, value in enumerate(self.assignations):
@@ -107,13 +107,15 @@ class MeetingsFrame(ctk.CTkFrame):
             if (value["school"] == True):
                 which_assignation = school_switcher(self.widgets["option_type_" + self.assignations[i]["key"]].get())
                 assignation_options = None
+                companion_options = self.all_witnesses["studients"]["companion_female"] + self.all_witnesses["studients"]["companion_male"]
                 if which_assignation == "masters":
                     assignation_options = self.all_witnesses["ministerials"]["masters"]
                 else:
                     assignation_options = self.all_witnesses[self.assignations[i]["role"]][which_assignation]
                 assignation_options = [item[1] for item in assignation_options]
+                companion_options = [item[1] for item in companion_options]
                 self.widgets["option0_" + self.assignations[i]["key"]].configure(values=assignation_options)
-                self.widgets["option1_" + self.assignations[i]["key"]].configure(values=assignation_options)
+                self.widgets["option1_" + self.assignations[i]["key"]].configure(values=companion_options)
                 pass
             else:
                 assignation_options = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
