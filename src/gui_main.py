@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from src.gui.meetings import MeetingsFrame
+from src.gui.manual import ManualFrame
 from src.gui.replacements import ReplacementsFrame
 from src.gui.participants import ParticipantsFrame
 from src.gui.notifications import NotificationsFrame
@@ -15,7 +16,9 @@ class App(ctk.CTk):
         self.tab_view.grid(row=0, column=0, padx=20, pady=10, columnspan=4)
         
     def change_tab(self):
-        if self.tab_view.get() == "Reuniones":
+        if self.tab_view.get() == "Selección manual":
+            self.geometry("956x870")
+        elif self.tab_view.get() == "Selección automatizada":
             self.geometry("956x870")
         elif self.tab_view.get() == "Remplazos":
             self.geometry("956x870")
@@ -25,19 +28,21 @@ class App(ctk.CTk):
             self.geometry("956x910")
             self.tab_view.notifications_frame.load_weeks()
         elif self.tab_view.get() == "Limpiar":
-            self.geometry("504x360")
+            self.geometry("670x360")
 
 class TabView(ctk.CTkTabview):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
-        self.add("Reuniones")
+        self.add("Selección manual")
+        self.add("Selección automatizada")
         self.add("Remplazos")
         self.add("Notificaciones")
         self.add("Participantes")
         self.add("Limpiar")
 
-        self.meetings_frame = MeetingsFrame(master=self.tab("Reuniones"))
+        self.manual_frame = ManualFrame(master=self.tab("Selección manual"))
+        self.meetings_frame = MeetingsFrame(master=self.tab("Selección automatizada"))
         self.replacements_frame = ReplacementsFrame(master=self.tab("Remplazos"))
         self.notifications_frame = NotificationsFrame(master=self.tab("Notificaciones"), tabview=self)
         self.participants_frame = ParticipantsFrame(master=self.tab("Participantes"))
