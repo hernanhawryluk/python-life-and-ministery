@@ -57,7 +57,7 @@ class DataBase:
     def read_all_participants_names(self):
         con = sqlite3.connect(self.table_name)
         cur = con.cursor()
-        cur.execute("SELECT name FROM Witnesses")
+        cur.execute("SELECT name FROM Witnesses ORDER BY name ASC")
         rows = cur.fetchall()
         cur.close()
         return rows
