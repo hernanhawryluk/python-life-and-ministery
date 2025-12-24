@@ -187,13 +187,13 @@ class NotificationsFrame(ctk.CTkFrame):
         if self.option_week_selector.get() != "Elegir semana":
             week = self.selected_week
             assignment = self.widgets["option_type_" + key].get()
-            name = self.widgets["option0_" + key].get()
+            titular = self.widgets["option0_" + key].get()
             companion = self.widgets["option1_" + key].get()
             message = ""
             if self.checkbox_only_reminders.get() == 0:
-                message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + name + ".\n" + "Ayudante: " + companion + "."
+                message = "¡Hola " + titular.split(' ')[0] + "! Espero que te encuentres bien. Te envío tu asignación para la reunión Vida y Ministerio Cristianos:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + titular + ".\n" + "Ayudante: " + companion + "."
             else:
-                message = self.reminder_message_generator(name, assignment)
+                message = self.reminder_message_generator(titular, assignment)
             pyperclip.copy(message)
             self.open_dialog_window()
 
@@ -205,7 +205,7 @@ class NotificationsFrame(ctk.CTkFrame):
             name = self.widgets["option_" + key].get()
             message = ""
             if self.checkbox_only_reminders.get() == 0:
-                message = "Asignación para la reunión vida y ministerio teocrático:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + name + "."
+                message = "¡Hola " + name.split(' ')[0] + "! Espero que te encuentres bien. Te envío tu asignación para la reunión Vida y Ministerio Cristianos:\n\n" + week + "\n" + "Asignación: " + assignment + ".\n" + "Titular: " + name + "."
             else:
                 message = self.reminder_message_generator(name, assignment)
             pyperclip.copy(message)
