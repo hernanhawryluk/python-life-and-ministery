@@ -3,12 +3,9 @@ import datetime
 
 def calculate_weeks(additional_month = 0):
     now = datetime.datetime.now()
-    current_year = now.year
-    current_month = now.month
-    if current_month + additional_month > 12:
-        current_month = 1 + (current_month + additional_month) % 12
-    else:
-        current_month = now.month + additional_month
+    target_month_index = now.month + additional_month
+    current_year = now.year + (target_month_index - 1) // 12
+    current_month = ((target_month_index - 1) % 12) + 1
     
     if current_month == 12:
         next_year = current_year + 1

@@ -25,6 +25,28 @@ def meeting_switcher(assignation):
         }
         return switcher[assignation]
 
+def assignment_label(assignment):
+      switcher = {
+            "presidency": "Presidencia",
+            "initial_pray": "Oración inicial",
+            "treasures": "Tesoros de la Biblia",
+            "pearls": "Busquemos Perlas Escondidas",
+            "read_bible": "Lectura de la Biblia",
+            "first": "Empiece conversaciones",
+            "revisit": "Haga revisitas",
+            "course": "Haga discípulos",
+            "explain": "Explique sus creencias",
+            "speech": "Discurso estudiantil",
+            "masters": "Análisis con el auditorio",
+            "random_1": "Asignación 1",
+            "random_2": "Asignación 2",
+            "needs": "Necesidades Locales",
+            "book": "Estudio Biblico de Congregación",
+            "read_book": "Lectura en Estudio Biblico",
+            "ending_pray": "Oración final",
+      }
+      return switcher[assignment]
+
 def determiner_switcher(assignment):
       switcher= {
             "Presidencia": "la Presidencia",

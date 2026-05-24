@@ -32,8 +32,8 @@ class ReplacementsFrame(ctk.CTkFrame):
             if (value["school"] == True):
                 self.widgets["option_type_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias" , "Discurso estudiantil", "Análisis con el auditorio"], command=self.option_choose_assignation, width=250)
                 self.widgets["option_type_" + self.assignations[i]["key"]].set(value["default"])
-                self.widgets["option0_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
-                self.widgets["option1_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
+                self.widgets["option0_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=lambda choice, key=self.assignations[i]["key"], field="option0": self.option_choose_participant(choice, key, field), width=270)
+                self.widgets["option1_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=lambda choice, key=self.assignations[i]["key"], field="option1": self.option_choose_participant(choice, key, field), width=270)
 
                 self.widgets["option_type_" + self.assignations[i]["key"]].grid(row=i, column=0, padx=10, pady=10, sticky="nsew")
                 self.widgets["option0_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10)
@@ -41,7 +41,7 @@ class ReplacementsFrame(ctk.CTkFrame):
 
             else:
                 self.widgets["label_" + self.assignations[i]["key"]] = ctk.CTkLabel(master=master, text=value["text"], font=("Arial", 16), width=300, anchor="w")
-                self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=self.option_choose_participant, width=270)
+                self.widgets["option_" + self.assignations[i]["key"]] = ctk.CTkOptionMenu(master=master, values=[""], command=lambda choice, key=self.assignations[i]["key"], field="option": self.option_choose_participant(choice, key, field), width=270)
 
                 self.widgets["label_" + self.assignations[i]["key"]].grid(row=i, column=0, padx=10, pady=10)
                 self.widgets["option_" + self.assignations[i]["key"]].grid(row=i, column=1, padx=10, pady=10)
@@ -56,8 +56,11 @@ class ReplacementsFrame(ctk.CTkFrame):
         self.generate_options()
 
 
-    def option_choose_participant(self, choice):
-        self.witnesses_excluded.append(choice)
+    def option_choose_participant(self, choice, key=None, field=None):
+        if choice and choice not in self.witnesses_excluded:
+            self.witnesses_excluded.append(choice)
+        if field == "option0" and key is not None:
+            self.update_companion_options(key, choice)
 
 
     def save_dates(self):
@@ -69,7 +72,7 @@ class ReplacementsFrame(ctk.CTkFrame):
                 assistant = self.widgets["option1_" + self.assignations[i]["key"]].get()
                 if assigned != "":
                     data_dict.append(["replacements_date", assigned, week])
-                elif assistant != "":
+                if assistant != "":
                     data_dict.append(["replacements_date", assistant, week])
             else:
                 assigned = self.widgets["option_" + self.assignations[i]["key"]].get()
@@ -79,13 +82,17 @@ class ReplacementsFrame(ctk.CTkFrame):
 
 
     def option_choose_assignation(self, choice):
+        self.generate_options()
         for i in range(1, 5):
             option_type = self.widgets[f"option_type_school_{i}"]
             if option_type.get() in ["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias"]:
                 self.widgets[f"option1_school_{i}"].grid()
+                titular = self.widgets[f"option0_school_{i}"].get()
+                if titular:
+                    self.update_companion_options(f"school_{i}", titular)
             else:
+                self.widgets[f"option1_school_{i}"].set("")
                 self.widgets[f"option1_school_{i}"].grid_remove()
-        self.generate_options()
                 
 
     def generate_options(self):
@@ -106,6 +113,27 @@ class ReplacementsFrame(ctk.CTkFrame):
                 assignation_options = self.all_witnesses[self.assignations[i]["role"]][self.assignations[i]["key"]]
                 assignation_options = [item[1] for item in assignation_options]
                 self.widgets["option_" + self.assignations[i]["key"]].configure(values=assignation_options)
+
+    def update_companion_options(self, key, titular):
+        if not titular:
+            return
+        option_type = self.widgets["option_type_" + key].get()
+        if option_type not in ["Empiece conversaciones", "Haga revisitas", "Haga discípulos", "Explique sus creencias"]:
+            self.widgets["option1_" + key].set("")
+            return
+        witness_data = self.db.read_participant(titular)
+        if not witness_data:
+            return
+        gender = witness_data[0][3]
+        companion_key = "companion_female" if gender == "Mujer" else "companion_male"
+        companion_options = [
+            item[1]
+            for item in self.all_witnesses["studients"][companion_key]
+            if item[1] != titular
+        ]
+        self.widgets["option1_" + key].configure(values=companion_options)
+        if self.widgets["option1_" + key].get() not in companion_options:
+            self.widgets["option1_" + key].set("")
     
 
     def clear_widgets(self):

@@ -6,7 +6,9 @@ class ParticipantsFrame(ctk.CTkFrame):
         super().__init__(master)
 
         self.db = DataBase()
+        self.dialog_window = None
         self.to_modify = None
+        self.original_name = None
         self.all_data = self.db.read_all_participants_names()
         self.all_witnesses = [f"{data[0]}" for data in self.all_data]
         
@@ -20,6 +22,8 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.checkbox_allow_replacement = ctk.CTkCheckBox(master=master, text="Acepta remplazos", font=("Arial", 14), width=205)
         self.button_clear = ctk.CTkButton(master=master, text="Limpiar Datos", width=430, height=40, command=self.clear_data)
         self.button_save = ctk.CTkButton(master=master, text="Guardar Cambios", width=430,height=40, command=self.save_data)
+        self.entry_search = ctk.CTkEntry(master=master, placeholder_text="Buscar participante", width=430, height=40)
+        self.entry_search.bind("<KeyRelease>", self.filter_participants)
         self.option_modify = ctk.CTkOptionMenu(master=master, values=self.all_witnesses, width=430, height=40)
         if self.all_witnesses != []: 
             self.option_modify.set("Participantes")
@@ -36,9 +40,10 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.checkbox_allow_replacement.grid(row=1, column=3, padx=10, pady=10)
         self.button_clear.grid(row=2, column=0, padx=10, pady=10, columnspan=2)
         self.button_save.grid(row=2, column=2, padx=10, pady=10, columnspan=2)
-        self.option_modify.grid(row=3, column=0, padx=10, pady=10, columnspan=2)
-        self.button_modify.grid(row=3, column=2, padx=10, pady=10)
-        self.button_delete.grid(row=3, column=3, padx=10, pady=10)
+        self.entry_search.grid(row=3, column=0, padx=10, pady=10, columnspan=2)
+        self.option_modify.grid(row=4, column=0, padx=10, pady=10, columnspan=2)
+        self.button_modify.grid(row=4, column=2, padx=10, pady=10)
+        self.button_delete.grid(row=4, column=3, padx=10, pady=10)
 
     def save_data(self):
         values = [
@@ -59,12 +64,17 @@ class ParticipantsFrame(ctk.CTkFrame):
             self.db.create_new_participant(values)
         else:
             self.db.modify_participant(self.to_modify, values)
-            self.all_witnesses.remove(values[0])
+            if self.original_name in self.all_witnesses:
+                self.all_witnesses.remove(self.original_name)
             self.to_modify = None
+            self.original_name = None
 
-        self.all_witnesses.append(values[0])
+        if values[0] not in self.all_witnesses:
+            self.all_witnesses.append(values[0])
+        self.all_witnesses.sort()
         self.option_modify.configure(values=self.all_witnesses)
         self.option_modify.set(values[0])
+        self.entry_search.delete(0, "end")
         self.clear_data()
         
 
@@ -75,6 +85,15 @@ class ParticipantsFrame(ctk.CTkFrame):
         self.checkbox_custom.deselect()
         self.checkbox_companion_only.deselect()
         self.checkbox_allow_replacement.deselect()
+
+    def filter_participants(self, event=None):
+        search = self.entry_search.get().lower().strip()
+        filtered = [name for name in self.all_witnesses if search in name.lower()]
+        self.option_modify.configure(values=filtered)
+        if filtered:
+            self.option_modify.set(filtered[0])
+        else:
+            self.option_modify.set("Sin resultados")
 
     def modify_data(self):
         if self.option_modify.get() != "Participantes":
@@ -90,15 +109,57 @@ class ParticipantsFrame(ctk.CTkFrame):
             if witness[7] == 1: self.checkbox_companion_only.select()
             if witness[8] == 1: self.checkbox_allow_replacement.select()
             self.to_modify = witness[0]
+            self.original_name = witness[1]
 
     def delete_data(self):
         if self.option_modify.get() != "Participantes":
             name = self.option_modify.get()
-            self.db.delete_participant(name)
-            self.all_witnesses.remove(name)
-            if self.all_witnesses == []: 
-                self.option_modify.set("Participantes")
-            else:
-                self.option_modify.configure(values=self.all_witnesses)
-                self.option_modify.set(self.all_witnesses[0])
+            self.open_delete_dialog(name)
 
+    def open_delete_dialog(self, name):
+        if self.dialog_window is None or not self.dialog_window.winfo_exists():
+            self.dialog_window = DeleteParticipantDialog(self, name)
+        else:
+            self.dialog_window.focus()
+
+    def confirm_delete(self, name):
+        self.db.delete_participant(name)
+        if name in self.all_witnesses:
+            self.all_witnesses.remove(name)
+        self.option_modify.configure(values=self.all_witnesses)
+        if self.all_witnesses == []:
+            self.option_modify.set("Participantes")
+        else:
+            self.option_modify.set(self.all_witnesses[0])
+        if self.to_modify is not None and self.entry_name.get() == name:
+            self.to_modify = None
+            self.original_name = None
+            self.clear_data()
+
+
+class DeleteParticipantDialog(ctk.CTkToplevel):
+    def __init__(self, parent, name):
+        super().__init__(parent)
+        self.parent = parent
+        self.name = name
+
+        window_width = 460
+        window_height = 150
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        position_x = (screen_width // 2) - (window_width // 2)
+        position_y = (screen_height // 2) - (window_height // 2)
+        self.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
+        self.title("Confirmar borrado")
+
+        self.label = ctk.CTkLabel(self, text=f"¿Seguro que querés borrar a {name}?", font=("Arial", 18))
+        self.label.grid(row=0, column=0, padx=30, pady=(24, 8), columnspan=2)
+
+        self.button_cancel = ctk.CTkButton(self, text="Cancelar", width=120, height=40, command=self.destroy)
+        self.button_confirm = ctk.CTkButton(self, text="Borrar", width=120, height=40, command=self.confirm)
+        self.button_cancel.grid(row=1, column=0, padx=20, pady=(20, 10))
+        self.button_confirm.grid(row=1, column=1, padx=20, pady=(20, 10))
+
+    def confirm(self):
+        self.parent.confirm_delete(self.name)
+        self.destroy()

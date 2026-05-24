@@ -6,6 +6,7 @@ class CleanFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
         self.dialog_window = None
+        self.db = DataBase()
 
         self.label_clear_logs = ctk.CTkLabel(master=master, text="Limpiar registros anteriores:", width=430, anchor="w", font=("Arial", 17))
         self.option_clear_logs = ctk.CTkOptionMenu(master=master, width=430, height=40)
@@ -28,6 +29,7 @@ class CleanFrame(ctk.CTkFrame):
         to_keep = False
         erase_until = self.option_clear_logs.get()
         if erase_until != "Elegir hasta que registro se debe limpiar":
+            self.db.delete_meetings_until(erase_until)
             file_path = path.join("data", "meetings.log")
             if (path.exists(file_path) == True):
                 file = open(file_path, 'r')
@@ -47,17 +49,18 @@ class CleanFrame(ctk.CTkFrame):
                 
 
     def load_weeks(self):
+        weeks_options = self.db.read_meeting_weeks()
         file_path = path.join("data", "meetings.log")
         if (path.exists(file_path) == True):
             file = open(file_path, 'r')
-            weeks_options = []
             for line in file:
-                if line[:6] == "Semana":
-                    weeks_options.append(line.replace("\n", ""))
-            self.option_clear_logs.configure(values=weeks_options)
-            if len(weeks_options) > 0:
-                self.option_clear_logs.set("Elegir hasta que registro se debe limpiar")
+                week = line.replace("\n", "")
+                if line[:6] == "Semana" and week not in weeks_options:
+                    weeks_options.append(week)
             file.close()
+        self.option_clear_logs.configure(values=weeks_options)
+        if len(weeks_options) > 0:
+            self.option_clear_logs.set("Elegir hasta que registro se debe limpiar")
 
     def open_dialog_window(self):
         if self.dialog_window is None or not self.dialog_window.winfo_exists():

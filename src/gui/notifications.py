@@ -79,21 +79,22 @@ class NotificationsFrame(ctk.CTkFrame):
     
 
     def load_weeks(self):
+        weeks_options = self.db.read_meeting_weeks()
         file_path = path.join("data", "meetings.log")
         if (path.exists(file_path) == True):
             file = open(file_path, 'r')
-            weeks_options = []
             for line in file:
-                if line[:6] == "Semana":
-                    weeks_options.append(line.replace("\n", ""))
-            self.option_week_selector.configure(values=weeks_options)
-            if len(weeks_options) > 0:
-                self.option_week_selector.set("Elegir semana")
+                week = line.replace("\n", "")
+                if line[:6] == "Semana" and week not in weeks_options:
+                    weeks_options.append(week)
+            file.close()
+        self.option_week_selector.configure(values=weeks_options)
+        if len(weeks_options) > 0:
+            self.option_week_selector.set("Elegir semana")
 
 
     def on_click_select_week(self, key):
-        for i, value in enumerate(self.assignations):
-                self.widgets["checkbox_" + self.assignations[i]["key"]].deselect()
+        self.clear_assignations()
         self.selected_week = key
         self.load_week()
         if self.driver != None:
@@ -132,6 +133,8 @@ class NotificationsFrame(ctk.CTkFrame):
                         assignment = self.widgets["option_type_" + self.assignations[i]["key"]].get()
                         titular = self.widgets["option0_" + self.assignations[i]["key"]].get()
                         companion = self.widgets["option1_" + self.assignations[i]["key"]].get()
+                        if not titular:
+                            continue
                         if self.checkbox_only_reminders.get() == 0:
                             message = [f"¡Hola {titular.split(' ')[0]}! Espero que te encuentres bien. Te envío tu asignación para la reunión Vida y Ministerio Cristianos:", "", str(week), "Asignación: " + assignment, "Titular: " + titular, "Ayudante: " + companion]
                         else:
@@ -139,6 +142,8 @@ class NotificationsFrame(ctk.CTkFrame):
                     else:
                         assignment = self.widgets["checkbox_" + self.assignations[i]["key"]].cget("text")
                         titular = self.widgets["option_" + self.assignations[i]["key"]].get()
+                        if not titular:
+                            continue
                         if self.checkbox_only_reminders.get() == 0:
                             message = [f"¡Hola {titular.split(' ')[0]}! Espero que te encuentres bien. Te envío tu asignación para la reunión Vida y Ministerio Cristianos:", "", str(week), "Asignación: " + assignment, "Titular: " + titular]
                         else:
@@ -213,6 +218,13 @@ class NotificationsFrame(ctk.CTkFrame):
 
 
     def load_week(self):
+        db_assignments = self.db.read_meeting_assignments(self.selected_week)
+        if db_assignments:
+            for assignment_type, assignment_label, titular, companion in db_assignments:
+                self.fill_assignation_from_db(assignment_type, assignment_label, titular, companion)
+            self.school_counter = 0
+            return
+
         file_path = path.join("data", "meetings.log")
         if (path.exists(file_path) == True):
             file = open(file_path, 'r')
@@ -228,6 +240,29 @@ class NotificationsFrame(ctk.CTkFrame):
                         self.fill_assignation(line.replace("\n", ""))
             self.school_counter = 0
             file.close()
+
+    def clear_assignations(self):
+        for i, value in enumerate(self.assignations):
+            self.widgets["checkbox_" + self.assignations[i]["key"]].deselect()
+            if value["school"] == True:
+                self.widgets["option_type_" + self.assignations[i]["key"]].set(value["text"])
+                self.widgets["option0_" + self.assignations[i]["key"]].set("")
+                self.widgets["option1_" + self.assignations[i]["key"]].set("")
+            else:
+                self.widgets["option_" + self.assignations[i]["key"]].set("")
+
+    def fill_assignation_from_db(self, assignment_type, assignment, name, companion):
+        school_assignments = {"first", "revisit", "course", "explain", "speech", "masters"}
+        if assignment_type in school_assignments:
+            self.school_counter += 1
+            key = "school_" + str(self.school_counter)
+            self.widgets["checkbox_" + key].select()
+            self.widgets["option_type_" + key].set(assignment)
+            self.widgets["option0_" + key].set(name)
+            self.widgets["option1_" + key].set(companion or "")
+        else:
+            self.widgets["checkbox_" + assignment_type].select()
+            self.widgets["option_" + assignment_type].set(name)
 
     
     def fill_assignation(self, line):
