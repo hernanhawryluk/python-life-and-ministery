@@ -252,6 +252,19 @@ class DataBase:
         cur.close()
         con.close()
         return rows
+
+
+    def read_all_participants(self):
+        con = sqlite3.connect(self.table_name)
+        cur = con.cursor()
+        cur.execute(
+            """SELECT name, gender, role, exclude, custom, companion_only, replacements
+               FROM Witnesses"""
+        )
+        rows = cur.fetchall()
+        cur.close()
+        con.close()
+        return rows
     
 
     def read_participant(self, name):

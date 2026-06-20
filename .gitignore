@@ -3,9 +3,11 @@ __pycache__
 
 # database
 witnesses.db
+data/backups/witnesses_before_import_*.db
 
 # outputs
 meetings.log
 
 # env
 env
+prompt-updates.md
